@@ -16,8 +16,9 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@wepy/x": "^2.0.2",
     "@wepy/core": "^2.0.0-alpha.9",
+    "@wepy/x": "^2.0.2",
+    "flyio": "^0.6.14",
     "miniprogram-slide-view": "0.0.3"
   },
   "devDependencies": {
