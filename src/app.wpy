@@ -58,7 +58,11 @@ wepy.app({
 <config>
 {
     pages: [
-      'pages/index'
+      //'pages/login',
+      //'pages/index',
+      'pages/voteEntrance',
+      'pages/teamVote',
+      'pages/indivVote'
     ],
     window: {
       backgroundTextStyle: 'light',

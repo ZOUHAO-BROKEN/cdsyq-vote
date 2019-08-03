@@ -1,4 +1,15 @@
 <style type="less">
+.body{
+
+width:100%;
+height:100%;
+position: absolute;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+
+}
 .userinfo {
     display: flex;
     flex-direction: column;
@@ -17,12 +28,23 @@
 </style>
 
 <template>
-<div class="container">
-<button  open-type="getUserInfo" bindgetuserinfo="setUserInfo">授权</button>
-<div class="userinfo">
+<div class="body">
+
+<!--<div class="userinfo">
+<input type="number" placeholder="请输入手机号码" auto-focus bindinput="bindTelno">
+<input type="number" placeholder="请输入手机号码" auto-focus bindinput="bindTelno">
 <image class="userinfo-avater" src="{{userInfo.avatarUrl}}" background-size="cover"/>
 <div class="userinfo-nickname">{{ userInfo.nickName }}</div>
-</div>
+
+<button @tap="login">登陆</button>
+<button type="default" open-type="getUserInfo" bindgetuserinfo="setUserInfo">登陆</button>
+
+
+</div>-->
+<input type="number" placeholder="请输入手机号码" auto-focus bindinput="bindTelno"/>
+<button type="primary" size="default" open-type="getUserInfo" bindgetuserinfo="setUserInfo" disabled="{{btnDisable}}">{{btnLable}}</button>
+
+
 </div>
 </template>
 <script>
@@ -30,19 +52,115 @@ import wepy from "@wepy/core"
 
 wepy.page({
 	data: {
-		userInfo: ''
+		appId: 'wx2f57cbeea4374512',
+		telno: '',
+		userInfo: '',
+		btnDisable: true,
+		btnLable: '登陆',
+		signIn: false
 	},
 	methods: {
-		setUserInfo(res){
-			this.userInfo = res.userInfo;
+		async setUserInfo(res){
+			//console.log(this);
+			
+			//this.btnDisable = true;
+			//this.btnLable = "正在登陆。。。"
+
+			//TODO signin request 
+
+			wx.showLoading({
+  				title: '正在登陆',
+			})
+
+			/*wepy.request('https://ccbynt.cn/khxxurl/static/index.html').then(
+				(d) => {console.log(d)}
+				);
+			*/
+
+			/*wx.request({
+				url: 'https://ccbynt.cn/khxxurl/web/api/user/checkUser?openId='+this.userInfo.nickName+'&phone='+this.telno,
+				header: {
+    				'content-type': 'application/json' // 默认值
+  				},
+				success: function(d){
+					console.log(d);
+				}
+			});
+
+			setTimeout(function () {
+			  wx.hideLoading()
+			}, 2000)
+*/
+
+			//
+			wx.redirectTo({
+					url: 'voteEntrance'
+			});
+
+			//this.userInfo = res.userInfo;
+			//this.login();
+		},
+		bindTelno(e){
+			this.telno = e.$wx.detail.value;
+			this.btnDisable = false;
+		},
+		login(){
+			
+		},
+		checkLogin(){
+
+
+			wx.showLoading({
+  				title: '加载中',
+			})
+
+			//TODO check logstat
+			//request call back
+			//TODO change signIn stat
+
+			//已注册，跳转投票入口页面
+			if(this.signIn){
+				wx.hideLoading();
+				wx.redirectTo({
+					url: 'voteEntrance'
+				});
+
+			//未注册，打开注册页面
+			}else{
+				wx.hideLoading();
+			}
+			
+
+			setTimeout(function () {
+			  wx.hideLoading()
+			}, 2000)
+
+
 		}
 	},
 
 	created(){
+
+		this.checkLogin();
+
 		let self = this;
 		wx.login({
+			withCredentials: true,
 			success(res){
-				console.log(res.code);
+				console.log(res);
+
+				/*wx.request({
+  				url: 'https://api.weixin.qq.com/sns/jscode2session?appid={{self.appId}}&secret=SECRET&js_code='+ res.code +'&grant_type=authorization_code',
+  				data: {},
+  				header: {
+      				'content-type': 'application/json'
+  				},
+				success: function(res) {
+				   openid = res.data.openid //返回openid
+				   console.log("openId: " + openid);
+				}
+				})*/
+
 			}
 		})
 		wx.getUserInfo({
