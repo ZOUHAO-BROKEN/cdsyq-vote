@@ -41,10 +41,13 @@ wepy.page({
     indivVoteBtn: 'https://ccbynt.cn/khxxurl/static/button2.png',
     isTeamVoteTime: false,
     isIndivVoteTime: false,
-    animation: {}
+    animationData: {}
   },
   methods:{
     teamVote(){
+
+
+
       if(this.isTeamVoteTime){
           wx.navigateTo({
             url:"teamVote"
@@ -74,7 +77,7 @@ wepy.page({
           wx.showModal({
             title: '提示',
             showCancel: false,
-            content: '团队投票通道未开启，请稍等',
+            content: '个人投票通道未开启，请稍等',
             success (res) {
               if (res.confirm) {
                 console.log('用户点击确定')
@@ -92,32 +95,26 @@ wepy.page({
 
   onShow(){
 
-    self = this;
 
-    /*this.animationData = wx.createAnimation({
+    var animation = wx.createAnimation({
       duration: 1000,
-      timingFunction: 'ease'
+      timingFunction: 'ease',
     })
 
-    console.log(this.animationData);
+    var next = true;
 
-    var next = true;*/
-
-    /*setInterval(function () {
-      console.log(11);
+    setInterval(function () {
       if (next) {
-        this.animationData.scale(0.95).step()   
+        animation.scale(0.95,0.95).step()   
         next = !next;
       } else {
-        this.animationData.scale(1).step()
+        animation.scale(1.05,1.05).step()
         next = !next;
       }
-      //this.animationData.scale(1).step();
 
+      this.animationData = animation.export();
 
-      //this.animationData = this.animationData.export();
-      //this.animationData.scale(0.95).step();
-    }.bind(this), 500)*/
+    }.bind(this), 500)
   }
 })
 </script>
