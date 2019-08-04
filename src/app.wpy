@@ -58,7 +58,7 @@ wepy.app({
 <config>
 {
     pages: [
-      //'pages/login',
+      'pages/login',
       //'pages/index',
       'pages/voteEntrance',
       'pages/teamVote',
@@ -67,7 +67,7 @@ wepy.app({
     window: {
       backgroundTextStyle: 'light',
       navigationBarBackgroundColor: '#fff',
-      navigationBarTitleText: 'WeChat',
+      navigationBarTitleText: '知识竞赛投票',
       navigationBarTextStyle: 'black'
     }
 }
