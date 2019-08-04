@@ -40,10 +40,10 @@ var zhtool = require('../common/zhtool.js')
 wepy.page({
   data: {
     bgurl: 'https://ccbynt.cn/khxxurl/static/bg.jpg',
-    teamVoteBtn: 'https://ccbynt.cn/khxxurl/static/button1.png',
-    indivVoteBtn: 'https://ccbynt.cn/khxxurl/static/button2.png',
-    //teamVoteBtn: 'https://ccbynt.cn/khxxurl/static/button-disable-1.jpg',
-    //indivVoteBtn: 'https://ccbynt.cn/khxxurl/static/button-disable-2.jpg',
+    //teamVoteBtn: 'https://ccbynt.cn/khxxurl/static/button1.png',
+    //indivVoteBtn: 'https://ccbynt.cn/khxxurl/static/button2.png',
+    teamVoteBtn: 'https://ccbynt.cn/khxxurl/static/button-disable-1.png',
+    indivVoteBtn: 'https://ccbynt.cn/khxxurl/static/button-disable-2.png',
     isTeamVoteTime: false,
     isIndivVoteTime: false,
     animationData: {},
@@ -113,16 +113,16 @@ wepy.page({
 
           //vote start
           if(res.data.responseData.voteState == '1'){
-            //self.teamVoteBtn = 'https://ccbynt.cn/khxxurl/static/button1.png';
+            self.teamVoteBtn = 'https://ccbynt.cn/khxxurl/static/button1.png';
             self.isTeamVoteTime = true;
-            self.teamVoteAnimateStart();
+            //self.teamVoteAnimateStart();
             //clearInterval(this.teamIntervalId);
 
             //TODO 动画
           }else{
-            //self.teamVoteBtn = 'https://ccbynt.cn/khxxurl/static/button-disable-1.jpg';
+            self.teamVoteBtn = 'https://ccbynt.cn/khxxurl/static/button-disable-1.png';
             self.isTeamVoteTime = false;
-            self.teamVoteAnimateStop();
+            //self.teamVoteAnimateStop();
             console.log('teamVote not start!');
           }
         
@@ -141,14 +141,14 @@ wepy.page({
           console.log(res);
           //vote start
           if(res.data.responseData.voteState == '1'){
-            //self.indivVoteBtn = 'https://ccbynt.cn/khxxurl/static/button2.png';
+            self.indivVoteBtn = 'https://ccbynt.cn/khxxurl/static/button2.png';
             self.isIndivVoteTime = true;
             
             //clearInterval(this.indivIntervalId);
 
             //TODO 动画
           }else{
-            //self.indivVoteBtn = 'https://ccbynt.cn/khxxurl/static/button-disable-2.jpg';
+            self.indivVoteBtn = 'https://ccbynt.cn/khxxurl/static/button-disable-2.png';
             self.isIndivVoteTime = false;
 
             console.log('individual not start!');

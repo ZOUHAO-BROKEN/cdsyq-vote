@@ -42,7 +42,7 @@ justify-content: center;
 
 </div>-->
 <!--<img src="https://ccbynt.cn/khxxurl/static/bg.jpg" style="height: 80px" mode="aspectFit"/>-->
-<input style="width:100%" type="number" placeholder="请输入手机号码" auto-focus bindinput="bindTelno"/>
+<input style="width:100%; height:100px;" type="number" placeholder="请输入手机号码" auto-focus bindinput="bindTelno"/>
 <button style="width:100%" type="primary" size="default" open-type="getUserInfo" bindgetuserinfo="setUserInfo" disabled="{{btnDisable}}">{{btnLable}}</button>
 
 
