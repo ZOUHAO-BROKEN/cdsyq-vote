@@ -25,8 +25,8 @@ page{
 <img class="background" mode="aspectFill" src="{{bgurl}}"/>
 <view class="voteEn">
 
-<img  style="height:40px;" mode="aspectFit" src="{{teamVoteBtn}}" animation="{{animationData}}" @tap="teamVote"/>
-<img  style="height:40px;" mode="aspectFit" src="{{indivVoteBtn}}" @tap="indivVote"/>
+<img  style="height:40px;" mode="aspectFit" src="{{teamVoteBtn}}" animation="{{animationData}}" @tap="teamVoteTap"/>
+<img  style="height:40px;" mode="aspectFit" src="{{indivVoteBtn}}" @tap="indivVoteTap"/>
 </view>
 
 
@@ -34,6 +34,9 @@ page{
 
 <script>
 import wepy from '@wepy/core'
+
+var zhtool = require('../common/zhtool.js')
+
 wepy.page({
   data: {
     bgurl: 'https://ccbynt.cn/khxxurl/static/bg.jpg',
@@ -41,16 +44,18 @@ wepy.page({
     indivVoteBtn: 'https://ccbynt.cn/khxxurl/static/button2.png',
     isTeamVoteTime: false,
     isIndivVoteTime: false,
-    animationData: {}
+    animationData: {},
+    teamIntervalId: '',
+    indivIntervalId: ''
+
   },
   methods:{
-    teamVote(){
+    teamVoteTap(){
 
-
-
+      this.checkTeadVoteStat();
       if(this.isTeamVoteTime){
           wx.navigateTo({
-            url:"teamVote"
+            url:"voteteam"
           });
       }else{
           wx.showModal({
@@ -68,10 +73,13 @@ wepy.page({
       }
       
     },
-    indivVote(){
+    indivVoteTap(){
+
+      this.checkIndivVoteStat();
+
       if(this.isIndivVoteTime){
           wx.navigateTo({
-            url:"indivVote"
+            url:"voteteam"
           });
       }else{
           wx.showModal({
@@ -86,6 +94,51 @@ wepy.page({
           })
       }
       
+    },
+    checkTeadVoteStat(){
+
+      self = this;
+
+      let teamVoteStatUrl = 'https://ccbynt.cn/khxxurl/web/api/team/voteState';
+
+      zhtool.httpsRequest(teamVoteStatUrl).then(res => {
+
+          //vote start
+          if(res.data.responseData.voteState == '1'){
+            self.isTeamVoteTime = true;
+            clearInterval(this.teamIntervalId);
+
+            //TODO 动画
+          }else{
+            console.log('teamVote not start!');
+          }
+        
+      }).catch(res => {
+          
+      });
+    },
+    checkIndivVoteStat(){
+
+      self = this;
+
+      let indivVoteStatUrl = 'https://ccbynt.cn/khxxurl/web/api/player/voteStart';
+
+      zhtool.httpsRequest(indivVoteStatUrl).then(res => {
+
+          console.log(res);
+          //vote start
+          if(res.data.responseData.voteState == '1'){
+            self.isIndivVoteTime = true;
+            clearInterval(this.indivIntervalId);
+
+            //TODO 动画
+          }else{
+            console.log('individual not start!');
+          }
+        
+      }).catch(res => {
+        
+      });
     }
       
   },
@@ -95,8 +148,21 @@ wepy.page({
 
   onShow(){
 
+    self = this;
+    this.teamIntervalId = setInterval(function(){
+      self.checkTeadVoteStat();
+    }, 5000);
+    //console.log(intervalId);
 
-    var animation = wx.createAnimation({
+    /*setTimeout(function(){
+        clearInterval(intervalId);
+    }, 5000)*/
+
+    this.indivIntervalId = setInterval(function(){
+      self.checkIndivVoteStat()
+    }, 5000);
+
+    /*var animation = wx.createAnimation({
       duration: 1000,
       timingFunction: 'ease',
     })
@@ -114,7 +180,7 @@ wepy.page({
 
       this.animationData = animation.export();
 
-    }.bind(this), 500)
+    }.bind(this), 500)*/
   }
 })
 </script>
