@@ -1,0 +1,37 @@
+<template>
+  <div class="weui-cells weui-cells_after-title">
+    <div class="weui-cell weui-cell_example" v-for="item in players" :key="item.playerId">
+      <span class="weui-cell__hd">
+          <image src="{{ item.headImage}}" style="margin-right: 16px;vertical-align: middle;width:20px; height: 20px;"></image>
+      </span>
+      <span class="weui-cell__bd">{{ item.playerName }}</span>
+    </div>
+  </div>
+</template>
+
+<script>
+  import wepy from '@wepy/core'
+  import { getStaticUrl } from '../utils/request'
+  wepy.page({
+    config: {
+      navigationBarTitleText: '队伍详情'
+    },
+    data: {
+      players: []
+    },
+    onLoad(option) {
+      const self = this
+      const eventChannel = this.$wx.getOpenerEventChannel()
+      // 监听acceptDataFromOpenerPage事件，获取上一页面通过eventChannel传送到当前页面的数据
+      eventChannel.on('acceptDataFromOpenerPage', function(team) {
+        console.log(team)
+        self.players = team.players.map(item => {
+          item.headImage = getStaticUrl(item.headImage)
+          return item
+        })
+      })
+    },
+    methods: {
+    }
+  })
+</script>

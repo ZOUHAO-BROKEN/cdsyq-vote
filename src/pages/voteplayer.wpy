@@ -1,0 +1,110 @@
+<template>
+<div>
+  <div v-for="item in team" :key="item.teamId">
+    <div class="weui-cells weui-cells_after-title">
+      <div class="weui-cell" style="justify-content: center;align-items: center;">
+        <div class="weui-cell__hd" style="position: relative;margin-right: 10px;">
+          <image src="{{ item.logoImage }}" style="width: 50px; height: 50px; display: block"/>
+        </div>
+        <div class="weui-cell__bd" style="flex:0">
+          <div style="align:center">{{ item.teamName }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="weui-cells weui-cells_after-title">
+      <div class="weui-cell weui-cell_access">
+        <view class="weui-cell__bd">
+          <view class="weui-grids">
+            <block v-for="player in item.players" :key="player.playerId">
+              <navigator url="" class="weui-grid "
+              :class="{'weui-grid_active':player.checked}"
+              @tap="handleClick(item.teamId, player.playerId)">
+                <image class="weui-grid__icon" src="{{ player.headImage }}" />
+                <view class="weui-grid__label">{{ player.playerName }}<icon wx:if="{{player.checked}}" class="weui-icon-radio" type="success_no_circle" size="16"></icon></view>
+              </navigator>
+            </block>
+          </view>
+        </view>
+      </div>
+    </div>
+  </div>
+  <view class="weui-btn-area">
+      <button v-if="isVoted" class="weui-btn" type="primary" @tap="confirmVote">确定</button>
+      <button v-else class="weui-btn" type="primary" disabled="true">确定</button>
+    </view>
+</div>
+  
+</template>
+
+<script>
+  import wepy from '@wepy/core'
+  import {
+    getAllTeam, votePlayer, getStaticUrl
+  } from '../utils/request'
+  wepy.page({
+    config: {
+      navigationBarTitleText: '队伍投票'
+    },
+    data: {
+      team: [],
+      checkedTeam: '',
+      isVoted: true
+    },
+    onLoad() {
+      getAllTeam().then(s => {
+        this.team = s.map(e => {
+          e.checked=false
+          e.logoImage = getStaticUrl(e.logoImage)
+          e.players = e.players.map(item => {
+            item.headImage = getStaticUrl(item.headImage)
+            item.checked = false
+            return item
+          })
+          return e
+        })
+      })
+    },
+    methods: {
+      handleClick(teamId, playerId) {
+        this.team.forEach(item => {
+          if(item.teamId === teamId) {
+            item.players.forEach(player => {
+              player.checked = player.playerId === playerId
+            })
+          }
+        })
+      },
+      confirmVote() {
+        if (!this.isVoted) {
+          return
+        }
+        let playerArr = [];
+        this.team.forEach(team => {
+          team.players.forEach(player => {
+            if(player.checked) {
+              playerArr.push({
+                'playerId': player.playerId
+              })
+            }
+          })
+        })
+        if (playerArr.length !== this.team.length) {
+          wx.showToast({
+            title: '请在每队选择一位选手！',
+            icon: 'none',
+            duration: 2500
+          })
+          return
+        }
+        votePlayer({players: playerArr}).then(res => {
+          wx.showToast({
+            title: '投票成功！',
+            // icon: 'fail',
+            duration: 1000
+          })
+          this.isVoted = false
+        })
+      }
+    }
+  })
+</script>
