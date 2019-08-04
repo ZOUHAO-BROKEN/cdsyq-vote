@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="page__bd">
     <span class="weui-cells__title">请选择最喜爱的队伍(长按查看详情)</span>
     <div class="weui-cells weui-cells_after-title">
       <div class="weui-cell weui-cell_access">
@@ -17,7 +17,7 @@
         </view>
       </div>
     </div>
-    <view class="weui-btn-area">
+    <view class="weui-btn-area" style="padding-bottom: 30px">
       <button v-if="isVoted" class="weui-btn" type="primary" @tap="confirmVote">确定</button>
       <button v-else class="weui-btn" type="primary" disabled="true">确定</button>
     </view>

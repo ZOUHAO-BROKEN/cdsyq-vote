@@ -29,7 +29,7 @@
       </div>
     </div>
   </div>
-  <view class="weui-btn-area">
+  <view class="weui-btn-area" style="padding-bottom: 30px">
       <button v-if="isVoted" class="weui-btn" type="primary" @tap="confirmVote">确定</button>
       <button v-else class="weui-btn" type="primary" disabled="true">确定</button>
     </view>
