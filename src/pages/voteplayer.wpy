@@ -104,13 +104,14 @@
         this.teams.forEach(team => {
           team.players.forEach(player => {
             if(player.checked) {
+              console.log(player)
               playerArr.push({
                 'playerId': player.playerId
               })
             }
           })
         })
-        if (playerArr.length !== this.team.length) {
+        if (playerArr.length !== this.teams.length) {
           wx.showToast({
             title: '请在每队选择一位选手！',
             icon: 'none',
