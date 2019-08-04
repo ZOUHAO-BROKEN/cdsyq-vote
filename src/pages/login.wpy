@@ -1,8 +1,8 @@
 <style type="less">
 .body{
 
-width:100%;
-height:100%;
+width: 100%;
+height: 60%;
 position: absolute;
 display: flex;
 flex-direction: column;
@@ -41,8 +41,9 @@ justify-content: center;
 
 
 </div>-->
-<input type="number" placeholder="请输入手机号码" auto-focus bindinput="bindTelno"/>
-<button type="primary" size="default" open-type="getUserInfo" bindgetuserinfo="setUserInfo" disabled="{{btnDisable}}">{{btnLable}}</button>
+<!--<img src="https://ccbynt.cn/khxxurl/static/bg.jpg" style="height: 80px" mode="aspectFit"/>-->
+<input style="width:100%" type="number" placeholder="请输入手机号码" auto-focus bindinput="bindTelno"/>
+<button style="width:100%" type="primary" size="default" open-type="getUserInfo" bindgetuserinfo="setUserInfo" disabled="{{btnDisable}}">{{btnLable}}</button>
 
 
 </div>
@@ -50,17 +51,21 @@ justify-content: center;
 <script>
 import wepy from "@wepy/core"
 
+var zhtool = require('../common/zhtool.js')
+
 wepy.page({
 	data: {
 		appId: 'wx2f57cbeea4374512',
 		telno: '',
 		userInfo: '',
 		btnDisable: true,
-		btnLable: '登陆',
+		btnLable: '注册',
+		openId: '',
+		nickName: '',
 		signIn: false
 	},
 	methods: {
-		async setUserInfo(res){
+		setUserInfo(res){
 			//console.log(this);
 			
 			//this.btnDisable = true;
@@ -69,8 +74,53 @@ wepy.page({
 			//TODO signin request 
 
 			wx.showLoading({
-  				title: '正在登陆',
-			})
+  				title: '正在注册',
+			});
+
+			let registUrl = 'https://ccbynt.cn/khxxurl/web/api/user/register?openId='+this.openId+'&phone='+this.telno;
+
+			zhtool.httpsRequest(registUrl).then(res => {
+
+				//signIn success
+				if(res.data.responseData.userStatus == '1'){
+					
+
+					wx.hideLoading();
+					wx.redirectTo({
+						url: 'voteEntrance?userId='+res.data.responseData.userId
+					});
+
+				//signIn fail
+				}else{
+					wx.hideLoading();
+
+					wx.showModal({
+			            title: '注册错误',
+			            showCancel: false,
+			            content: '注册错误，请确认电话后号码重试',
+			            success (res) {
+			              if (res.confirm) {
+			                
+			              }
+			            }
+			         })
+				}
+				console.log(res);
+			}).catch(res => {
+				console.log(res);
+
+				wx.hideLoading();
+				wx.showModal({
+			        title: '注册异常',
+			        showCancel: false,
+			        content: '注册服务异常，请重试',
+			        success (res) {
+			              if (res.confirm) {
+			                
+			              }
+			        }
+			   	})
+			});
 
 			/*wepy.request('https://ccbynt.cn/khxxurl/static/index.html').then(
 				(d) => {console.log(d)}
@@ -93,9 +143,9 @@ wepy.page({
 */
 
 			//
-			wx.redirectTo({
+			/*wx.redirectTo({
 					url: 'voteEntrance'
-			});
+			});*/
 
 			//this.userInfo = res.userInfo;
 			//this.login();
@@ -107,19 +157,49 @@ wepy.page({
 		login(){
 			
 		},
-		checkLogin(){
+		checkRegist(){
 
-
+			self = this;
 			wx.showLoading({
   				title: '加载中',
 			})
+
+			let checkUserUrl = 'https://ccbynt.cn/khxxurl/web/api/user/checkUser?openId='+this.openId;
+
+			zhtool.httpsRequest(checkUserUrl).then(res => {
+					console.log(res);				
+
+					wx.hideLoading();
+
+					//already signIn
+					if(res.data.responseData.userStatus == '1'){
+						wx.redirectTo({
+							url: 'voteEntrance?userId='+res.data.responseData.userId
+						});
+						self.signIn = true;
+						console.log('checkUser call result: user already signIn')
+					}else{
+						wx.hideLoading();
+						self.signIn = false;
+						console.log('checkUser call result: user not signIn')
+					}
+					
+				}).catch(res => {
+
+						console.log(res);
+						self.signIn = false;
+						wx.hideLoading();
+						console.log('checkUser call result: call failed')
+
+				});
 
 			//TODO check logstat
 			//request call back
 			//TODO change signIn stat
 
+
 			//已注册，跳转投票入口页面
-			if(this.signIn){
+			/*if(this.signIn){
 				wx.hideLoading();
 				wx.redirectTo({
 					url: 'voteEntrance'
@@ -131,19 +211,72 @@ wepy.page({
 			}
 			
 
-			setTimeout(function () {
-			  wx.hideLoading()
-			}, 2000)
+			
+			wx.hideLoading();*/
 
+		},
+		getOpenId(){
 
+			/*let checkUserUrl = 'https://ccbynt.cn/khxxurl/web/api/user/checkUser?openId='+this.openId;
+
+			zhtool.httpsRequest(checkUserUrl).then(res => {
+					console.log(res);
+					
+				}).catch(res => {
+						console.log(res);
+				});
+			*/
+
+			/*for(var i = 0; i < 500; ++i){
+				console.log('send times ' + i);
+				this.wxRequest('https://ccbynt.cn/khxxurl/web/api/user/checkUser?openId='+this.openId).then(res => {
+					console.log(res);
+					console.log(i+"times");
+				}).catch(res => {
+						console.log(res);
+				});
+			}*/
+			
+			//console.log('1');
+			
+
+			//console.log('2');
+			//await wx.getUserInfo();
+
+			//console.log(this.userInfo);
+
+			self = this;
+			//TODO request openId
+			console.log('getOpenId function');
+			wx.getUserInfo({
+	         success: function(res) {
+	         	console.log('get userInfo success');
+
+	         	//console.log(res);
+	         	self.userInfo = res.userInfo;
+	          	//console.log(res.userInfo)
+	          	self.openId = self.userInfo.nickName;
+	          	self.nickName = self.userInfo.nickName;
+	          	console.log(self.openId);
+
+	          	self.checkRegist();
+
+	        	},
+	         fail: function(e){
+	         	console.log('get userInfo error');
+	         	console.log(e);
+	         }
+	    	})
 		}
 	},
 
 	created(){
 
-		this.checkLogin();
+		this.getOpenId();
 
-		let self = this;
+		
+
+		/*let self = this;
 		wx.login({
 			withCredentials: true,
 			success(res){
@@ -159,16 +292,16 @@ wepy.page({
 				   openid = res.data.openid //返回openid
 				   console.log("openId: " + openid);
 				}
-				})*/
+				})
 
 			}
-		})
-		wx.getUserInfo({
+		})*/
+		/*wx.getUserInfo({
 	         success: function(res) {
 	         	self.userInfo = res.userInfo;
 	          	//console.log(res.userInfo)
 	        }
-	    })  
+	    })*/ 
     }
 })
 
