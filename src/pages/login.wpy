@@ -52,10 +52,12 @@ justify-content: center;
 import wepy from "@wepy/core"
 
 var zhtool = require('../common/zhtool.js')
+var utilmd5 = require('../common/md5.js')
 
 wepy.page({
 	data: {
 		appId: 'wx2f57cbeea4374512',
+
 		telno: '',
 		userInfo: '',
 		btnDisable: true,
@@ -255,7 +257,9 @@ wepy.page({
 	         	//console.log(res);
 	         	self.userInfo = res.userInfo;
 	          	//console.log(res.userInfo)
-	          	self.openId = self.userInfo.nickName;
+	          	//console.log(utilmd5.hexMD5(res.userInfo.avatarUrl));
+	          	//self.openId = self.userInfo.nickName;
+	          	self.openId = utilmd5.hexMD5(res.userInfo.avatarUrl);
 	          	self.nickName = self.userInfo.nickName;
 	          	console.log(self.openId);
 
@@ -274,7 +278,13 @@ wepy.page({
 
 		this.getOpenId();
 
-		
+		wx.login({
+			withCredentials: true,
+			success(res){
+				console.log('login result......');
+				console.log(res);
+			}
+		})
 
 		/*let self = this;
 		wx.login({
