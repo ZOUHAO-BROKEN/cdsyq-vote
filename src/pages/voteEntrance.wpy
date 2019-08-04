@@ -57,7 +57,7 @@ wepy.page({
       if(this.isTeamVoteTime){
           console.log(self.userId);
           wx.navigateTo({
-            url:"voteteam?userId"+self.userId
+            url:"voteteam?userId="+self.userId
           });
       }else{
           wx.showModal({
