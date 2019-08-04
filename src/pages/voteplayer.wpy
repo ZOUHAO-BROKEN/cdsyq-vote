@@ -1,13 +1,14 @@
 <template>
 <div>
-  <div v-for="item in team" :key="item.teamId">
+  <span class="weui-cells__title">请选择最喜爱的队员</span>
+  <div v-for="team in teams" :key="team.teamId">
     <div class="weui-cells weui-cells_after-title">
       <div class="weui-cell" style="justify-content: center;align-items: center;">
         <div class="weui-cell__hd" style="position: relative;margin-right: 10px;">
-          <image src="{{ item.logoImage }}" style="width: 50px; height: 50px; display: block"/>
+          <image src="{{ team.logoImage }}" style="width: 50px; height: 50px; display: block"/>
         </div>
         <div class="weui-cell__bd" style="flex:0">
-          <div style="align:center">{{ item.teamName }}</div>
+          <div style="align:center">{{ team.teamName }}</div>
         </div>
       </div>
     </div>
@@ -15,10 +16,10 @@
       <div class="weui-cell weui-cell_access">
         <view class="weui-cell__bd">
           <view class="weui-grids">
-            <block v-for="player in item.players" :key="player.playerId">
+            <block v-for="player in team.players" :key="player.playerId">
               <navigator url="" class="weui-grid "
               :class="{'weui-grid_active':player.checked}"
-              @tap="handleClick(item.teamId, player.playerId)">
+              @tap="handleClick(team.teamId, player.playerId)">
                 <image class="weui-grid__icon" src="{{ player.headImage }}" />
                 <view class="weui-grid__label">{{ player.playerName }}<icon wx:if="{{player.checked}}" class="weui-icon-radio" type="success_no_circle" size="16"></icon></view>
               </navigator>
@@ -39,20 +40,22 @@
 <script>
   import wepy from '@wepy/core'
   import {
-    getAllTeam, votePlayer, getStaticUrl
+    getAllTeam, votePlayer, getStaticUrl, getPlayerVoteResult
   } from '../utils/request'
   wepy.page({
     config: {
       navigationBarTitleText: '队伍投票'
     },
     data: {
-      team: [],
+      teams: [],
       checkedTeam: '',
-      isVoted: true
+      isVoted: true,
+      voteForm: {}
     },
-    onLoad() {
+    onLoad(option) {
+      this.voteForm.userId = option.userId
       getAllTeam().then(s => {
-        this.team = s.map(e => {
+        this.teams = s.map(e => {
           e.checked=false
           e.logoImage = getStaticUrl(e.logoImage)
           e.players = e.players.map(item => {
@@ -62,11 +65,30 @@
           })
           return e
         })
+        return getPlayerVoteResult({userId: this.voteForm.userId})
+      }).then(res => {
+        this.isVoted = res.isVoted === '0' && res.voteState === "1"
+        if (res.isVoted === '1') {
+          console.log(this.teams)
+          this.teams.forEach(team => {
+            team.players.forEach(player => {
+              res.players.forEach(selected => {
+                console.log(team)
+                console.log(player)
+                console.log(selected)
+                player.checked = player.checked || player.playerId === selected.playerId
+              })
+            })
+          })
+        }
       })
     },
     methods: {
-      handleClick(teamId, playerId) {
-        this.team.forEach(item => {
+      handleClick(teamId, playerId, flag) {
+        if (!this.isVoted && !flag) {
+          return
+        }
+        this.teams.forEach(item => {
           if(item.teamId === teamId) {
             item.players.forEach(player => {
               player.checked = player.playerId === playerId
@@ -79,7 +101,7 @@
           return
         }
         let playerArr = [];
-        this.team.forEach(team => {
+        this.teams.forEach(team => {
           team.players.forEach(player => {
             if(player.checked) {
               playerArr.push({
@@ -96,7 +118,8 @@
           })
           return
         }
-        votePlayer({players: playerArr}).then(res => {
+        this.voteForm.players = playerArr
+        votePlayer(this.voteForm).then(res => {
           wx.showToast({
             title: '投票成功！',
             // icon: 'fail',
