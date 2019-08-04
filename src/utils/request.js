@@ -91,3 +91,11 @@ export function votePlayer(params = {}) {
 export function getStaticUrl(url) {
   return "https://ccbynt.cn/khxxurl/static/" + url
 }
+
+export function getTeamVoteResult(params = {}) {
+  return sendRequest('GET', getRequestUrl('team/myVoteResult'), params)
+}
+
+export function getPlayerVoteResult(params = {}) {
+  return sendRequest('GET', getRequestUrl('player/myVoteResult'), params)
+}
