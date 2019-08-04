@@ -1,0 +1,82 @@
+<template>
+  <div>
+    <span class="weui-cells__title">请选择最喜爱的队伍(长按查看详情)</span>
+    <div class="weui-cells weui-cells_after-title">
+      <radio-group v-model="checkedTeam">
+        <label class="weui-cell weui-check__label"
+        v-for="(item, index) in team" :key="item.teamId"
+        @tap="radioChange(item.teamId)" @longpress="handleLongPress(index)">
+            <radio class="weui-check" value="{{item.teamId}}" checked="{{item.checked}}"/>
+            <image src="{{ item.logoImage}}" style="margin-right: 16px;vertical-align: middle;width:20px; height: 20px;"></image>
+            <view class="weui-cell__bd">{{item.teamName}}</view>
+            <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{item.checked}}">
+                <icon class="weui-icon-radio" type="success_no_circle" size="16"></icon>
+            </view>
+        </label>
+      </radio-group>
+    </div>
+    <view class="weui-btn-area">
+      <button v-if="isVoted" class="weui-btn" type="primary" @tap="confirmVote">确定</button>
+      <button v-else class="weui-btn" type="primary" disabled="true">确定</button>
+    </view>
+  </div>
+</template>
+
+<script>
+  import wepy from '@wepy/core'
+  import {
+    getAllTeam, voteTeam, getStaticUrl
+  } from '../utils/request'
+  wepy.page({
+    config: {
+      navigationBarTitleText: '队伍投票'
+    },
+    data: {
+      team: [],
+      checkedTeam: '',
+      isVoted: true
+    },
+    onLoad() {
+      getAllTeam().then(s => {
+        this.team = s.map(e => {
+          e.checked=false
+          e.logoImage = getStaticUrl(e.logoImage)
+          return e
+        })
+      })
+    },
+    methods: {
+      radioChange(id) {
+        this.checkedTeam = id
+        this.team.forEach(v => {
+          console.log(v.teamId)
+          console.log(this.checkedTeam)
+          v.checked = v.teamId === this.checkedTeam;
+        });
+      },
+      confirmVote() {
+        if (!this.isVoted) {
+          return
+        }
+        voteTeam({teamId: this.checkedTeam}).then(res => {
+          wx.showToast({
+            title: '投票成功！',
+            // icon: 'fail',
+            duration: 1000
+          })
+          this.isVoted = false
+        })
+      },
+      handleLongPress(index) {
+        console.log('查看队伍详情：' + index)
+        const team = this.team[index]
+        wx.navigateTo({
+          url: 'teamdetail',
+          success: function(res) {
+            res.eventChannel.emit('acceptDataFromOpenerPage', team)
+          }
+        })
+      }
+    }
+  })
+</script>
