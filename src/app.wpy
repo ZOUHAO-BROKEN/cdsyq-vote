@@ -59,10 +59,10 @@ wepy.app({
 {
     pages: [
       'pages/login',
-      //'pages/index',
       'pages/voteEntrance',
-      'pages/teamVote',
-      'pages/indivVote'
+      'pages/voteplayer',
+      'pages/teamdetail',
+      'pages/voteteam'
     ],
     window: {
       backgroundTextStyle: 'light',
