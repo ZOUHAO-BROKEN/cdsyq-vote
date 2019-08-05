@@ -143,7 +143,7 @@ wepy.page({
 					wx.showModal({
 			            title: '电话号码错误',
 			            showCancel: false,
-			            content: '请输入单位通讯录留存手机号码重试',
+			            content: '请输入单位通讯录留存手机号码',
 			            success (res) {
 			              if (res.confirm) {
 			                
