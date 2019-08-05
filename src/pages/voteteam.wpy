@@ -7,9 +7,9 @@
           <view class="weui-grids">
             <block v-for="(item, index) in team" :key="item.teamId" @longpress="handleLongPress(index)">
               <navigator url="" class="weui-grid "
-              :class="{'weui-grid_active':item.checked}" style="width:50%; height:100px"
+              :class="{'weui-grid_active':item.checked}" style="width:50%; height:100px; padding:5px"
               @tap="radioChange(item.teamId)"  @longpress="handleLongPress(index)">
-                <image class="weui-grid__icon" src="{{ item.logoImage }}" style="width:50px; height: 50px;"/>
+                <image class="weui-grid__icon" src="{{ item.logoImage }}" style="width:70px; height: 70px;"/>
                 <view class="weui-grid__label">{{ item.teamName }}<icon wx:if="{{item.checked}}" class="weui-icon-radio" type="success_no_circle" size="16"></icon></view>
               </navigator>
             </block>

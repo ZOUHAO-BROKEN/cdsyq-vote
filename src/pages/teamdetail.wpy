@@ -1,17 +1,25 @@
 <template>
-  <div class="weui-cells weui-cells_after-title">
-    <div class="weui-cell weui-cell_example" v-for="item in players" :key="item.playerId">
-      <span class="weui-cell__hd">
-          <image src="{{ item.headImage}}" style="margin-right: 16px;vertical-align: middle;width:20px; height: 20px;"></image>
-      </span>
-      <span class="weui-cell__bd">{{ item.playerName }}</span>
-    </div>
+<div class="weui-cells weui-cells_after-title">
+  <div class="weui-cell weui-cell_access">
+    <view class="weui-cell__bd">
+      <view class="weui-grids">
+        <block v-for="player in players" :key="player.playerId">
+          <navigator url="" class="weui-grid "
+          :class="{'weui-grid_active':player.checked}" style="width:50%; height:100px; padding:5px"
+          @tap="handleClick(team.teamId, player.playerId)">
+            <image class="weui-grid__icon" src="{{ player.headImage }}" style="width:70px;height:70px"/>
+            <view class="weui-grid__label">{{ player.playerName }}<icon wx:if="{{player.checked}}" class="weui-icon-radio" type="success_no_circle" size="16"></icon></view>
+          </navigator>
+        </block>
+      </view>
+    </view>
   </div>
+</div>
 </template>
 
 <script>
   import wepy from '@wepy/core'
-  import { getStaticUrl } from '../utils/request'
+  import { getStaticUrlNative } from '../utils/request'
   wepy.page({
     config: {
       navigationBarTitleText: '队伍详情'
@@ -26,7 +34,7 @@
       eventChannel.on('acceptDataFromOpenerPage', function(team) {
         console.log(team)
         self.players = team.players.map(item => {
-          item.headImage = getStaticUrl(item.headImage)
+          item.headImage = getStaticUrlNative(item.headImage)
           return item
         })
       })
