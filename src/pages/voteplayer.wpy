@@ -18,9 +18,9 @@
           <view class="weui-grids">
             <block v-for="player in team.players" :key="player.playerId">
               <navigator url="" class="weui-grid "
-              :class="{'weui-grid_active':player.checked}"
+              :class="{'weui-grid_active':player.checked}" style="padding: 5px"
               @tap="handleClick(team.teamId, player.playerId)">
-                <image class="weui-grid__icon" src="{{ player.headImage }}" />
+                <image class="weui-grid__icon" src="{{ player.headImage }}" style="width:60px;height:60px"/>
                 <view class="weui-grid__label">{{ player.playerName }}<icon wx:if="{{player.checked}}" class="weui-icon-radio" type="success_no_circle" size="16"></icon></view>
               </navigator>
             </block>
@@ -40,7 +40,7 @@
 <script>
   import wepy from '@wepy/core'
   import {
-    getAllTeam, votePlayer, getStaticUrl, getPlayerVoteResult
+    getAllTeam, votePlayer, getStaticUrl, getPlayerVoteResult, getStaticUrlNative
   } from '../utils/request'
   wepy.page({
     config: {
@@ -59,7 +59,7 @@
           e.checked=false
           e.logoImage = getStaticUrl(e.logoImage)
           e.players = e.players.map(item => {
-            item.headImage = getStaticUrl(item.headImage)
+            item.headImage = getStaticUrlNative(item.headImage)
             item.checked = false
             return item
           })

@@ -92,6 +92,10 @@ export function getStaticUrl(url) {
   return "https://ccbynt.cn/khxxurl/static/" + url
 }
 
+export function getStaticUrlNative(url) {
+  return "../img/" + url
+}
+
 export function getTeamVoteResult(params = {}) {
   return sendRequest('GET', getRequestUrl('team/myVoteResult'), params)
 }
