@@ -111,7 +111,7 @@ wepy.page({
 			//this.userInfo = res.userInfo;
 			//this.login();
 		},
-		register(openId,telno){
+		register(openId,telno,self){
 
 			/*if(this.openId == ""){
 				return;
@@ -176,17 +176,18 @@ wepy.page({
 		login(){
 			
 		},
-		checkRegist(){
+		checkRegist(openId,telno, self){
 
-			self = this;
+			//self = this;
+
 
 			wx.showLoading({
   				title: '加载中',
 			})
 
-			let checkUserUrl = 'https://ccbynt.cn/khxxurl/web/api/user/checkUser?openId='+this.openId;
+			let checkUserUrl = 'https://ccbynt.cn/khxxurl/web/api/user/checkUser?openId='+openId;
 
-			console.log("openId:" + this.openId);
+			console.log("openId:" + openId);
 
 			zhtool.httpsRequest(checkUserUrl).then(res => {
 					console.log(res);				
@@ -291,7 +292,7 @@ wepy.page({
 	          	}
 
 	          	if(callbackfunc){
-	          		callbackfunc(self.openId, self.telno);
+	          		callbackfunc(self.openId, self.telno, self);
 	          	}
 	          	
 
