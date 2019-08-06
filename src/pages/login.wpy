@@ -92,9 +92,9 @@ wepy.page({
 				this.getOpenId(this.register);
 			}else{
 
-			wx.showLoading({
+			/*wx.showLoading({
   				title: '正在登陆',
-			});
+			});*/
 
 			}
 
@@ -125,7 +125,7 @@ wepy.page({
 					wx.hideLoading();
 
 					wx.showModal({
-			            title: '电话号码错误',
+			            title: '手机号码错误',
 			            showCancel: false,
 			            content: '请输入单位通讯录留存手机号码',
 			            success (res) {
@@ -155,7 +155,13 @@ wepy.page({
 		},
 		bindTelno(e){
 			this.telno = e.$wx.detail.value;
-			this.btnDisable = false;
+
+			if(this.telno == ""){
+				this.btnDisable = true;
+			}else{
+				this.btnDisable = false;
+			}
+			
 		},
 		login(){
 			
