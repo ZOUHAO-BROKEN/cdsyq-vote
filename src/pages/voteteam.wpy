@@ -88,7 +88,7 @@
           wx.showToast({
             title: '投票成功！',
             // icon: 'fail',
-            duration: 1000
+            duration: 2500
           })
           this.isVoted = false
         })
