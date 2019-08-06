@@ -54,7 +54,7 @@ height: 100%;
 <view class="inputArea">
 <!--<input style="width:100%; height:60px; background:#F5F5F5;" type="number" placeholder="请输入单位通讯录留存手机号码" bindinput="bindTelno" focus="{{telInputFocus}}" />-->
 
-<input type="digit" class="inputStyle" placeholder="请输入单位通讯录留存手机号码" bindinput="bindTelno" focus="{{telInputFocus}}"/>
+<input type="digit" class="inputStyle" placeholder="请输入在单位通讯录中留存的手机号码" bindinput="bindTelno" focus="{{telInputFocus}}"/>
 
 </view>
 
@@ -87,10 +87,11 @@ wepy.page({
 	methods: {
 		setUserInfo(res){			
 
-			if(res.$wx.detail.errMsg != "getUserInfo:fail auth deny"){
-				this.telInputFocus = true;
+			if(res.$wx.detail.errMsg != "getUserInfo:fail auth deny"){				
 				this.getOpenId(this.register);
 			}else{
+
+				
 
 			/*wx.showLoading({
   				title: '正在登陆',
@@ -192,11 +193,12 @@ wepy.page({
 						console.log('checkUser call result: user already signIn')
 					}else{
 						//wx.hideLoading();
+						this.telInputFocus = true;
 						self.signIn = false;
 						console.log('checkUser call result: user not signIn')
 					}
 
-					//wx.hideLoading();
+					wx.hideLoading();
 					
 				}).catch(res => {
 
