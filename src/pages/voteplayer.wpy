@@ -8,12 +8,12 @@
   <div v-for="team in teams" :key="team.teamId">
     <div class="weui-cells weui-cells_after-title">
       <div class="weui-cell" style="justify-content: center;align-items: center;">
-        <div class="weui-cell__hd" style="position: relative;margin-right: 10px;">
+        <!-- <div class="weui-cell__hd" style="position: relative;margin-right: 10px;">
           <image src="{{ team.logoImage }}" style="width: 50px; height: 50px; display: block"/>
-        </div>
+        </div> -->
         <div class="weui-cell__bd" style="flex:0">
           <!-- <div>{{ team.teamName }}</div> -->
-          <image src="../img/votePlayer/team1.png" class="teamImg"/>
+          <image src="{{ team.teamImg }}" class="teamImg"/>
         </div>
       </div>
     </div>
@@ -38,7 +38,7 @@
   </div>
   <view class="weui-btn-area" style="padding-bottom: 30px">
       <button v-if="isVoted" class="weui-btn" type="primary" @tap="confirmVote">确定</button>
-      <button v-else class="weui-btn" type="primary" disabled="true">确定</button>
+      <button v-else class="weui-btn" type="primary" disabled="true">已投票</button>
     </view>
 </div>
   
@@ -64,7 +64,8 @@
       getAllTeam().then(s => {
         this.teams = s.map(e => {
           e.checked=false
-          e.logoImage = getStaticUrl(e.logoImage)
+          e.logoImage = getStaticUrlNative(e.logoImage)
+          e.teamImg = getStaticUrlNative('votePlayer/team' + e.teamId + '.png')
           e.players = e.players.map(item => {
             item.headImage = getStaticUrlNative(item.headImage)
             item.checked = false
@@ -161,7 +162,7 @@
   top: 1200rpx;
 }
 .bgImg2{
-  top: 1800rpx;
+  top: 2400rpx;
 }
 .bgImg4{
   z-index: 2
@@ -176,7 +177,7 @@
 .votePlayer-box{
   background: #fff;
   border: 10rpx solid #4F20FA;
-  padding: 50rpx 20rpx;
+  padding: 60rpx 20rpx 10rpx;
 }
 .weui-grid{
   border: 0
@@ -200,7 +201,7 @@
   border-radius:50%;
   border:1px solid #c9cbcd;
   margin-top: 35rpx;
-  margin-right:20rpx; 
+  margin-right:10rpx; 
 }
 .team-checked{
   z-index: 4;
@@ -211,9 +212,23 @@
   width: 360rpx;
   height: 90rpx;
   position: absolute;
-  top: 20rpx;
+  /* top: 120rpx; */
   left: 50%;
-  /* transform: translateY(-50%); */
+  transform: translateX(-50%);
+  z-index: 2
+}
+.button-hover[type=primary]{
+  background-color:#f8b301; 
+  font-size: 36rpx;
+  color: #fff
+}
+button[disabled][type=primary]{
+  background-color:#f4c753; 
+  font-size: 36rpx;
+  color: #fff
+}
+button[type=primary]{
+  background-color:#f8b301; 
 }
 </style>
 
