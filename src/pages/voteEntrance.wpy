@@ -25,8 +25,8 @@ page{
 <img class="background" mode="aspectFill" src="{{bgurl}}"/>
 <view class="voteEn">
 
-<img  style="height:40px;" mode="aspectFit" src="{{teamVoteBtn}}" animation="{{teamAnimateData}}" @tap="teamVoteTap"/>
-<img  style="height:40px;" mode="aspectFit" src="{{indivVoteBtn}}" @tap="indivVoteTap"/>
+<img  style="height:45px;" mode="aspectFit" src="{{teamVoteBtn}}" animation="{{teamAnimateData}}" @tap="teamVoteTap"/>
+<img  style="height:45px;" mode="aspectFit" src="{{indivVoteBtn}}" @tap="indivVoteTap"/>
 </view>
 
 
@@ -39,11 +39,11 @@ var zhtool = require('../common/zhtool.js')
 
 wepy.page({
   data: {
-    bgurl: 'https://ccbynt.cn/khxxurl/static/bg.jpg',
+    bgurl: '../img/entranceBg.jpg',
     //teamVoteBtn: 'https://ccbynt.cn/khxxurl/static/button1.png',
     //indivVoteBtn: 'https://ccbynt.cn/khxxurl/static/button2.png',
-    teamVoteBtn: 'https://ccbynt.cn/khxxurl/static/button-disable-1.png',
-    indivVoteBtn: 'https://ccbynt.cn/khxxurl/static/button-disable-2.png',
+    teamVoteBtn: '../img/button-disable-1.png',
+    indivVoteBtn: '../img/button-disable-2.png',
     isTeamVoteTime: false,
     isIndivVoteTime: false,
     animationData: {},
@@ -70,7 +70,7 @@ wepy.page({
           wx.showModal({
             title: '提示',
             showCancel: false,
-            content: '团队投票通道未开启，请稍等',
+            content: '团队投票通道未开启',
             success (res) {
               if (res.confirm) {
                 console.log('用户点击确定')
@@ -93,7 +93,7 @@ wepy.page({
           wx.showModal({
             title: '提示',
             showCancel: false,
-            content: '个人投票通道未开启，请稍等',
+            content: '个人投票通道未开启',
             success (res) {
               if (res.confirm) {
                 console.log('用户点击确定')
@@ -113,14 +113,14 @@ wepy.page({
 
           //vote start
           if(res.data.responseData.voteState == '1'){
-            self.teamVoteBtn = 'https://ccbynt.cn/khxxurl/static/button1.png';
+            self.teamVoteBtn = '../img/button1.png';
             self.isTeamVoteTime = true;
             //self.teamVoteAnimateStart();
             //clearInterval(this.teamIntervalId);
 
             //TODO 动画
           }else{
-            self.teamVoteBtn = 'https://ccbynt.cn/khxxurl/static/button-disable-1.png';
+            self.teamVoteBtn = '../img/button-disable-1.png';
             self.isTeamVoteTime = false;
             //self.teamVoteAnimateStop();
             console.log('teamVote not start!');
@@ -141,14 +141,14 @@ wepy.page({
           console.log(res);
           //vote start
           if(res.data.responseData.voteState == '1'){
-            self.indivVoteBtn = 'https://ccbynt.cn/khxxurl/static/button2.png';
+            self.indivVoteBtn = '../img/button2.png';
             self.isIndivVoteTime = true;
             
             //clearInterval(this.indivIntervalId);
 
             //TODO 动画
           }else{
-            self.indivVoteBtn = 'https://ccbynt.cn/khxxurl/static/button-disable-2.png';
+            self.indivVoteBtn = '../img/button-disable-2.png';
             self.isIndivVoteTime = false;
 
             console.log('individual not start!');
