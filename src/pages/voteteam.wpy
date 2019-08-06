@@ -1,17 +1,25 @@
 <template>
+<image  src="../img/bg-img/bgImg.png" mode="aspectFill" class="bgImg"/>
+<image  src="../img/bg-img/bg-img.png" mode="aspectFill" class="bg-img"/>
   <div class="page__bd">
-    <span class="weui-cells__title">请选择最喜爱的队伍(长按查看详情)</span>
-    <div class="weui-cells weui-cells_after-title">
+    <span class="weui-cells__title vote_title">请选择最喜爱的队伍</span>
+    <div class="weui-cells weui-cells_after-title vote-content-bg">
       <div class="weui-cell weui-cell_access">
         <view class="weui-cell__bd">
-          <view class="weui-grids">
+          <view class="weui-grids" style="border:0">
             <block v-for="(item, index) in team" :key="item.teamId" @longpress="handleLongPress(index)">
-              <navigator url="" class="weui-grid "
-              :class="{'weui-grid_active':item.checked}" style="width:50%; height:100px; padding:5px"
-              @tap="radioChange(item.teamId)"  @longpress="handleLongPress(index)">
-                <image class="weui-grid__icon" src="{{ item.logoImage }}" style="width:70px; height: 70px;"/>
-                <view class="weui-grid__label">{{ item.teamName }}<icon wx:if="{{item.checked}}" class="weui-icon-radio" type="success_no_circle" size="16"></icon></view>
-              </navigator>
+              <view url="" class="weui-grid team-box"
+              @tap="radioChange(item.teamId)">
+                <view class="bg-box"  :class="{'weui-grid_active':item.checked}">
+                  <view class="bg-div">
+                    <image class="weui-grid__icon team-img" src="{{ item.logoImage }}"/>
+                    <!-- <view class="weui-grid__label team-title">{{ item.teamName }}<icon  class="weui-icon-radio " type="success_no_circle" size="16"></icon></view> -->
+                     <view class="weui-grid__label team-title">{{ item.teamName }}</view>
+                     <view class="checked-box"><image wx:if="{{item.checked}}" src="../img/bg-img/bg-check.png" class="team-checked"/></view>
+                  </view>
+                  <image src="../img/bg-img/bg-btn.png"  class="goDetial" @tap="handleLongPress(index)" />
+                </view>
+              </view>
             </block>
           </view>
         </view>
@@ -19,7 +27,7 @@
     </div>
     <view class="weui-btn-area" style="padding-bottom: 30px">
       <button v-if="isVoted" class="weui-btn" type="primary" @tap="confirmVote">确定</button>
-      <button v-else class="weui-btn" type="primary" disabled="true">确定</button>
+      <button v-else class="weui-btn" type="primary" disabled="true">已投票</button>
     </view>
   </div>
 </template>
@@ -27,7 +35,7 @@
 <script>
   import wepy from '@wepy/core'
   import {
-    getAllTeam, voteTeam, getStaticUrl, getTeamVoteResult
+    getAllTeam, voteTeam, getStaticUrl, getTeamVoteResult,getStaticUrlNative
   } from '../utils/request'
   wepy.page({
     config: {
@@ -44,7 +52,7 @@
       getAllTeam().then(s => {
         this.team = s.map(e => {
           e.checked=false
-          e.logoImage = getStaticUrl(e.logoImage)
+          e.logoImage = getStaticUrlNative(e.logoImage)
           return e
         })
         return getTeamVoteResult({userId: this.voteForm.userId})
@@ -57,6 +65,8 @@
     },
     methods: {
       radioChange(id, flag) {
+        console.log(34343434)
+        console.log(this.isVoted + " " + flag)
         if (!this.isVoted && !flag) {
           return
         }
@@ -95,3 +105,112 @@
     }
   })
 </script>
+<style scoped>
+.bgImg{
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  left: 0
+}
+.bg-img{
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  position: absolute;
+  top: 0;
+  left: 0
+}
+.vote_title{
+  font-size: 36rpx;
+  color:#fbfdfd;
+  display:block;
+  text-align: center;
+}
+.page__bd{
+   position: absolute;
+   z-index: 3;
+   width: 100%
+}
+.vote-content-bg{
+  background: none
+}
+.team-box{
+  width:50%;
+  padding:5px;
+  margin-bottom:40rpx;
+  border: 0;
+}
+.team-title{
+  text-align: left;
+  color: #333;
+  font-size: 30rpx;
+  margin-top: 30rpx;
+  margin-bottom: 30rpx;
+  padding-left: 20rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  float: left;
+}
+.bg-box{
+  background:#cfedfd;
+  height:390rpx;
+  position:relative;
+}
+.bg-div{
+ background:#fff;
+ margin: 10rpx;
+ position: absolute;
+}
+.weui-cells:before,.weui-cells:after{
+  border:0
+}
+.weui-btn-area{
+margin: 0 15px 0.3em;
+}
+.team-img{
+width:300rpx; 
+height: 245rpx;
+}
+.checked-box{
+  float: right;
+  width: 44rpx;
+  height: 44rpx;
+  background-color: #eef7fc;
+  border-radius:50%;
+  border:1px solid #c9cbcd;
+  margin-top: 35rpx;
+  margin-right:20rpx; 
+}
+.team-checked{
+  z-index: 4;
+  width: 44rpx;
+  height: 44rpx;
+}
+.goDetial{
+  position: absolute;
+  z-index: 2;
+  width: 150rpx;
+  height: 50rpx;
+  right:15rpx;
+  top: 10rpx;
+}
+.weui-grid_active{
+  background-color: #fad77d !important
+}
+.button-hover[type=primary]{
+  background-color:#f8b301; 
+  font-size: 36rpx;
+  color: #fff
+}
+button[disabled][type=primary]{
+  background-color:#f4c753; 
+  font-size: 36rpx;
+  color: #fff
+}
+button[type=primary]{
+  background-color:#f8b301; 
+}
+</style>
+

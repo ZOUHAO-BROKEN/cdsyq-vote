@@ -1,6 +1,10 @@
 <template>
-<div>
-  <span class="weui-cells__title">请选择最喜爱的队员</span>
+<image src="../img/votePlayer/bg1.jpg" mode="aspectFill" class="bgImg"/>
+<image src="../img/votePlayer/bg2.jpg" mode="aspectFill" class="bgImg1"/>
+<image src="../img/votePlayer/bg3.jpg" mode="aspectFill" class="bgImg2"/>
+<image src="../img/votePlayer/bg4.png" mode="aspectFill" class="bgImg4"/>
+<div class="votePlayer-content">
+  <span class="weui-cells__title vote_title">请选择最喜爱的队员</span>
   <div v-for="team in teams" :key="team.teamId">
     <div class="weui-cells weui-cells_after-title">
       <div class="weui-cell" style="justify-content: center;align-items: center;">
@@ -8,21 +12,24 @@
           <image src="{{ team.logoImage }}" style="width: 50px; height: 50px; display: block"/>
         </div>
         <div class="weui-cell__bd" style="flex:0">
-          <div style="align:center">{{ team.teamName }}</div>
+          <!-- <div>{{ team.teamName }}</div> -->
+          <image src="../img/votePlayer/team1.png" class="teamImg"/>
         </div>
       </div>
     </div>
     <div class="weui-cells weui-cells_after-title">
       <div class="weui-cell weui-cell_access">
         <view class="weui-cell__bd">
-          <view class="weui-grids">
+          <view class="weui-grids votePlayer-box">
             <block v-for="player in team.players" :key="player.playerId">
-              <navigator url="" class="weui-grid "
-              :class="{'weui-grid_active':player.checked}" style="padding: 5px"
+              <view class="weui-grid "
+              :class="{'weui-grid_active':player.checked}" style="padding: 5px;margin-bottom:20rpx;"
               @tap="handleClick(team.teamId, player.playerId)">
-                <image class="weui-grid__icon" src="{{ player.headImage }}" style="width:60px;height:60px"/>
-                <view class="weui-grid__label">{{ player.playerName }}<icon wx:if="{{player.checked}}" class="weui-icon-radio" type="success_no_circle" size="16"></icon></view>
-              </navigator>
+                <image class="weui-grid__icon" src="{{ player.headImage }}" style="width:160rpx;height:160rpx"/>
+                <!-- <view class="weui-grid__label">{{ player.playerName }}<icon wx:if="{{player.checked}}" class="weui-icon-radio" type="success_no_circle" size="16"></icon></view> -->
+                <view class="weui-grid__label team-title">{{ player.playerName }}</view>
+                <view class="checked-box"><image wx:if="{{player.checked}}" src="../img/votePlayer/checked.png" class="team-checked"/></view>
+             </view>
             </block>
           </view>
         </view>
@@ -132,3 +139,81 @@
     }
   })
 </script>
+<style scoped>
+.weui-cells{
+  background: none
+}
+.vote_title{
+  font-size: 36rpx;
+  color:#fbfdfd;
+  display:block;
+  text-align: center;
+}
+.bgImg, .bgImg1, .bgImg2, .bgImg4{
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  left: 0
+}
+.bgImg1{
+  top: 1200rpx;
+}
+.bgImg2{
+  top: 1800rpx;
+}
+.bgImg4{
+  z-index: 2
+}
+.votePlayer-content{
+  position: absolute;
+  z-index: 2
+}
+.weui-cells:before, .weui-cells:after{
+  border:0
+}
+.votePlayer-box{
+  background: #fff;
+  border: 10rpx solid #4F20FA;
+  padding: 50rpx 20rpx;
+}
+.weui-grid{
+  border: 0
+}
+.team-title{
+  text-align: left;
+  color: #333;
+  font-size: 30rpx;
+  margin-top: 30rpx;
+  margin-bottom: 30rpx;
+  padding-left: 20rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  float: left;
+}
+.checked-box{
+  float: right;
+  width: 44rpx;
+  height: 44rpx;
+  background-color: #eef7fc;
+  border-radius:50%;
+  border:1px solid #c9cbcd;
+  margin-top: 35rpx;
+  margin-right:20rpx; 
+}
+.team-checked{
+  z-index: 4;
+  width: 44rpx;
+  height: 44rpx;
+}
+.teamImg{
+  width: 360rpx;
+  height: 90rpx;
+  position: absolute;
+  top: 20rpx;
+  left: 50%;
+  /* transform: translateY(-50%); */
+}
+</style>
+
