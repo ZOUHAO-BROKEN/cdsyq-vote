@@ -24,7 +24,7 @@
 
 <script>
   import wepy from '@wepy/core'
-  import { getStaticUrlNative } from '../utils/request'
+  import { getAllTeam, getStaticUrlNative } from '../utils/request'
   wepy.page({
     config: {
       navigationBarTitleText: '队伍详情'
@@ -34,13 +34,21 @@
     },
     onLoad(option) {
       const self = this
-      const eventChannel = this.$wx.getOpenerEventChannel()
+      //const eventChannel = this.$wx.getOpenerEventChannel()
       // 监听acceptDataFromOpenerPage事件，获取上一页面通过eventChannel传送到当前页面的数据
-      eventChannel.on('acceptDataFromOpenerPage', function(team) {
-        console.log(team)
-        self.players = team.players.map(item => {
-          item.headImage = getStaticUrlNative(item.headImage)
-          return item
+      // eventChannel.on('acceptDataFromOpenerPage', function(team) {
+      //   console.log(self)
+      //   console.log(team)
+      //   self.players = team.players
+      // })
+      getAllTeam().then(s => {
+        console.log(s)
+        console.log(option)
+        s.filter(team => team.teamId === option.teamId).forEach(e => {
+          self.players = e.players.map(item => {
+            item.headImage = getStaticUrlNative(item.headImage)
+            return item
+          })
         })
       })
     },
