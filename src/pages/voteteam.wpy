@@ -53,6 +53,7 @@
         this.team = s.map(e => {
           e.checked=false
           e.logoImage = getStaticUrlNative(e.logoImage)
+          
           return e
         })
         return getTeamVoteResult({userId: this.voteForm.userId})
@@ -87,7 +88,7 @@
           wx.showToast({
             title: '投票成功！',
             // icon: 'fail',
-            duration: 1000
+            duration: 2500
           })
           this.isVoted = false
         })
@@ -96,9 +97,9 @@
         console.log('查看队伍详情：' + index)
         const team = this.team[index]
         wx.navigateTo({
-          url: 'teamdetail',
+          url: 'teamdetail?teamId=' + team.teamId,
           success: function(res) {
-            res.eventChannel.emit('acceptDataFromOpenerPage', team)
+            
           }
         })
       }

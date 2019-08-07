@@ -20,7 +20,7 @@
     <div class="weui-cells weui-cells_after-title">
       <div class="weui-cell weui-cell_access">
         <view class="weui-cell__bd">
-          <view class="weui-grids votePlayer-box" :style="{ border:bgColor }">
+          <view class="weui-grids votePlayer-box"  :class="{'classA': team.teamId == '1', 'classB': team.teamId == '2', 'classC': team.teamId == '3', 'classD': team.teamId == '4'}">
             <block v-for="player in team.players" :key="player.playerId">
               <view class="weui-grid "
               :class="{'weui-grid_active':player.checked}" style="padding: 5px;margin-bottom:20rpx;"
@@ -57,23 +57,12 @@
       teams: [],
       checkedTeam: '',
       isVoted: true,
-      voteForm: {},
-      bgColor:"10rpx solid #4F20FA",
+      voteForm: {}
     },
     onLoad(option) {
       this.voteForm.userId = option.userId
       getAllTeam().then(s => {
         this.teams = s.map(e => {
-          // debugger
-          // if(e.teamId == 1){
-          //   this.data.bgColor="#4F20FA"
-          // }if(e.teamId == 2){
-          //   this.data.bgColor=" #fff"
-          // }if(e.teamId == 3){
-          //   this.data.bgColor="#4F20FA"
-          // }else if(e.teamId == 4){
-          //  this.data.bgColor="#4F20FA"
-          // }
           e.checked=false
           e.logoImage = getStaticUrlNative(e.logoImage)
           e.teamImg = getStaticUrlNative('votePlayer/team' + e.teamId + '.png')
@@ -143,12 +132,12 @@
           wx.showToast({
             title: '投票成功！',
             // icon: 'fail',
-            duration: 1000
+            duration: 2500
           })
           this.isVoted = false
         })
       }
-    }
+    },
   })
 </script>
 <style scoped>
@@ -240,6 +229,18 @@ button[disabled][type=primary]{
 }
 button[type=primary]{
   background-color:#f8b301; 
+}
+.classA{
+  border:10rpx solid #4F20FA
+}
+.classB{
+  border:10rpx solid #D220FA 
+}
+.classC{
+  border:10rpx solid #FA9220
+}
+.classD{
+  border:10rpx solid #20E3FA
 }
 </style>
 

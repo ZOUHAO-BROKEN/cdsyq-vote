@@ -1,51 +1,68 @@
 <style type="less">
-.body{
-
+page{
 width: 100%;
-height: 60%;
-position: absolute;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
+height: 100%;
 
 }
-.userinfo {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
 
-  .userinfo-avatar {
-    width: 80rpx;
-    height: 80rpx;
-    border-radius: 50%;
-  }
+.body{
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+}
 
-  .userinfo-nickname {
-    color: #aaa;
-  }
+.background{
+  width: 100%;
+  height: 100%;
+  position:absolute;
+  left:0px;
+  top:0px;
+  z-index:-1
+}
+
+.inputArea{
+  width: 100%;
+  height: 30%;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+}
+
+.inputStyle{
+	width:80%;
+	height:40px; 
+	border:1px solid #C7C6C6;
+	border-radius:4px;
+}
+
+.loginArea{
+  width: 100%;
+  height: 10%;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+}
+
 </style>
 
 <template>
+
+<img class="background" mode="aspectFill" src="{{bgurl}}"/>
 <div class="body">
+<view class="inputArea">
+<!--<input style="width:100%; height:60px; background:#F5F5F5;" type="number" placeholder="请输入单位通讯录留存手机号码" bindinput="bindTelno" focus="{{telInputFocus}}" />-->
 
-<!--<div class="userinfo">
-<input type="number" placeholder="请输入手机号码" auto-focus bindinput="bindTelno">
-<input type="number" placeholder="请输入手机号码" auto-focus bindinput="bindTelno">
-<image class="userinfo-avater" src="{{userInfo.avatarUrl}}" background-size="cover"/>
-<div class="userinfo-nickname">{{ userInfo.nickName }}</div>
+<input type="digit" class="inputStyle" placeholder="请输入在单位通讯录中留存的手机号码" bindinput="bindTelno" focus="{{telInputFocus}}"/>
 
-<button @tap="login">登陆</button>
-<button type="default" open-type="getUserInfo" bindgetuserinfo="setUserInfo">登陆</button>
+</view>
 
-
-</div>-->
-<!--<img src="https://ccbynt.cn/khxxurl/static/bg.jpg" style="height: 80px" mode="aspectFit"/>-->
-<input style="width:100%; height:60px; background:#F5F5F5;" type="number" placeholder="请输入单位通讯录留存手机号码" auto-focus bindinput="bindTelno"/>
-<button style="width:100%" type="primary" size="default" open-type="getUserInfo" bindgetuserinfo="setUserInfo" disabled="{{btnDisable}}">{{btnLable}}</button>
+<view class="loginArea">
+<button style="width:80%;  background-color:#0E8DFD;" type="primary" size="default" open-type="getUserInfo" bindgetuserinfo="setUserInfo" disabled="{{btnDisable}}">{{btnLable}}</button>
 
 
+</view>
 </div>
 </template>
 <script>
@@ -56,69 +73,37 @@ var utilmd5 = require('../common/md5.js')
 
 wepy.page({
 	data: {
+		bgurl: '../img/loginBg.jpg',
 		appId: 'wx2f57cbeea4374512',
-
 		telno: '',
 		userInfo: '',
 		btnDisable: true,
 		btnLable: '登陆',
 		openId: '',
 		nickName: '',
-		signIn: false
+		signIn: false,
+		telInputFocus: false
 	},
 	methods: {
 		setUserInfo(res){			
 
-			if(res.$wx.detail.errMsg != "getUserInfo:fail auth deny"){
+			if(res.$wx.detail.errMsg != "getUserInfo:fail auth deny"){				
 				this.getOpenId(this.register);
-			}
+			}else{
 
-			//console.log(res);
-			//console.log(this);
-			
-			//this.btnDisable = true;
-			//this.btnLable = "正在登陆。。。"
+				
 
-			//TODO signin request 
-
-			
-
-			/*wepy.request('https://ccbynt.cn/khxxurl/static/index.html').then(
-				(d) => {console.log(d)}
-				);
-			*/
-
-			/*wx.request({
-				url: 'https://ccbynt.cn/khxxurl/web/api/user/checkUser?openId='+this.userInfo.nickName+'&phone='+this.telno,
-				header: {
-    				'content-type': 'application/json' // 默认值
-  				},
-				success: function(d){
-					console.log(d);
-				}
-			});
-
-			setTimeout(function () {
-			  wx.hideLoading()
-			}, 2000)
-*/
-
-			//
-			/*wx.redirectTo({
-					url: 'voteEntrance'
+			/*wx.showLoading({
+  				title: '正在登陆',
 			});*/
 
-			//this.userInfo = res.userInfo;
-			//this.login();
+			}
+
 		},
 		register(openId,telno,self){
 
-			/*if(this.openId == ""){
-				return;
-			}*/
-
 			wx.showLoading({
-  				title: '正在注册',
+  				title: '正在登陆',
 			});
 
 			let registUrl = 'https://ccbynt.cn/khxxurl/web/api/user/register?openId='+openId+'&phone='+telno;
@@ -130,18 +115,18 @@ wepy.page({
 				//signIn success
 				if(res.data.responseData.userStatus == '1'){
 					
-
-					wx.hideLoading();
+					
 					wx.redirectTo({
 						url: 'voteEntrance?userId='+res.data.responseData.userId
 					});
+					wx.hideLoading();
 
 				//signIn fail
 				}else{
 					wx.hideLoading();
 
 					wx.showModal({
-			            title: '电话号码错误',
+			            title: '手机号码错误',
 			            showCancel: false,
 			            content: '请输入单位通讯录留存手机号码',
 			            success (res) {
@@ -159,7 +144,7 @@ wepy.page({
 				wx.showModal({
 			        title: '服务异常',
 			        showCancel: false,
-			        content: '注册服务异常，请重试',
+			        content: '登陆服务异常，请重试',
 			        success (res) {
 			              if (res.confirm) {
 			                
@@ -171,7 +156,13 @@ wepy.page({
 		},
 		bindTelno(e){
 			this.telno = e.$wx.detail.value;
-			this.btnDisable = false;
+
+			if(this.telno == ""){
+				this.btnDisable = true;
+			}else{
+				this.btnDisable = false;
+			}
+			
 		},
 		login(){
 			
@@ -180,19 +171,18 @@ wepy.page({
 
 			//self = this;
 
-
-			wx.showLoading({
-  				title: '加载中',
-			})
-
 			let checkUserUrl = 'https://ccbynt.cn/khxxurl/web/api/user/checkUser?openId='+openId;
 
 			console.log("openId:" + openId);
 
 			zhtool.httpsRequest(checkUserUrl).then(res => {
-					console.log(res);				
+					//console.log(res);				
 
 					wx.hideLoading();
+
+					wx.showLoading({
+  						title: '登陆中',
+					});
 
 					//already signIn
 					if(res.data.responseData.userStatus == '1'){
@@ -202,10 +192,13 @@ wepy.page({
 						self.signIn = true;
 						console.log('checkUser call result: user already signIn')
 					}else{
-						wx.hideLoading();
+						//wx.hideLoading();
+						this.telInputFocus = true;
 						self.signIn = false;
 						console.log('checkUser call result: user not signIn')
 					}
+
+					wx.hideLoading();
 					
 				}).catch(res => {
 
@@ -216,61 +209,10 @@ wepy.page({
 
 				});
 
-			//TODO check logstat
-			//request call back
-			//TODO change signIn stat
-
-
-			//已注册，跳转投票入口页面
-			/*if(this.signIn){
-				wx.hideLoading();
-				wx.redirectTo({
-					url: 'voteEntrance'
-				});
-
-			//未注册，打开注册页面
-			}else{
-				wx.hideLoading();
-			}
-			
-
-			
-			wx.hideLoading();*/
-
 		},
 		getOpenId(callbackfunc){
 
-			/*let checkUserUrl = 'https://ccbynt.cn/khxxurl/web/api/user/checkUser?openId='+this.openId;
 
-			zhtool.httpsRequest(checkUserUrl).then(res => {
-					console.log(res);
-					
-				}).catch(res => {
-						console.log(res);
-				});
-			*/
-
-			/*for(var i = 0; i < 500; ++i){
-				console.log('send times ' + i);
-				this.wxRequest('https://ccbynt.cn/khxxurl/web/api/user/checkUser?openId='+this.openId).then(res => {
-					console.log(res);
-					console.log(i+"times");
-				}).catch(res => {
-						console.log(res);
-				});
-			}*/
-			
-			//console.log('1');
-			
-
-			//console.log('2');
-			//await wx.getUserInfo();
-
-			//console.log(this.userInfo);
-
-			wx.showLoading({
-  				title: '加载中',
-			})
 			self = this;
 			//TODO request openId
 			console.log('getOpenId function');
@@ -296,7 +238,7 @@ wepy.page({
 	          	}
 	          	
 
-	          	wx.hideLoading();
+	          	//wx.hideLoading();
 
 	        	},
 	         fail: function(e){
@@ -310,49 +252,14 @@ wepy.page({
 
 	created(){
 
+		wx.showLoading({
+  				title: '加载中',
+		})
+
 		self = this;
 
 		this.getOpenId(this.checkRegist);
 
-		//if(this.openId != ""){
-		//this.checkRegist();
-		//}
-		
-
-		/*wx.login({
-			withCredentials: true,
-			success(res){
-				console.log('login result......');
-				console.log(res);
-			}
-		})*/
-
-		/*let self = this;
-		wx.login({
-			withCredentials: true,
-			success(res){
-				console.log(res);
-
-				/*wx.request({
-  				url: 'https://api.weixin.qq.com/sns/jscode2session?appid={{self.appId}}&secret=SECRET&js_code='+ res.code +'&grant_type=authorization_code',
-  				data: {},
-  				header: {
-      				'content-type': 'application/json'
-  				},
-				success: function(res) {
-				   openid = res.data.openid //返回openid
-				   console.log("openId: " + openid);
-				}
-				})
-
-			}
-		})*/
-		/*wx.getUserInfo({
-	         success: function(res) {
-	         	self.userInfo = res.userInfo;
-	          	//console.log(res.userInfo)
-	        }
-	    })*/ 
     }
 })
 
