@@ -20,7 +20,7 @@
     <div class="weui-cells weui-cells_after-title">
       <div class="weui-cell weui-cell_access">
         <view class="weui-cell__bd">
-          <view class="weui-grids votePlayer-box">
+          <view class="weui-grids votePlayer-box" :style="{ border:bgColor }">
             <block v-for="player in team.players" :key="player.playerId">
               <view class="weui-grid "
               :class="{'weui-grid_active':player.checked}" style="padding: 5px;margin-bottom:20rpx;"
@@ -57,12 +57,23 @@
       teams: [],
       checkedTeam: '',
       isVoted: true,
-      voteForm: {}
+      voteForm: {},
+      bgColor:"10rpx solid #4F20FA",
     },
     onLoad(option) {
       this.voteForm.userId = option.userId
       getAllTeam().then(s => {
         this.teams = s.map(e => {
+          // debugger
+          // if(e.teamId == 1){
+          //   this.data.bgColor="#4F20FA"
+          // }if(e.teamId == 2){
+          //   this.data.bgColor=" #fff"
+          // }if(e.teamId == 3){
+          //   this.data.bgColor="#4F20FA"
+          // }else if(e.teamId == 4){
+          //  this.data.bgColor="#4F20FA"
+          // }
           e.checked=false
           e.logoImage = getStaticUrlNative(e.logoImage)
           e.teamImg = getStaticUrlNative('votePlayer/team' + e.teamId + '.png')
