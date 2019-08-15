@@ -78,7 +78,7 @@ wepy.page({
 		telno: '',
 		userInfo: '',
 		btnDisable: true,
-		btnLable: '登陆',
+		btnLable: '登录',
 		openId: '',
 		nickName: '',
 		signIn: false,
@@ -94,7 +94,7 @@ wepy.page({
 				
 
 			/*wx.showLoading({
-  				title: '正在登陆',
+  				title: '正在登录',
 			});*/
 
 			}
@@ -103,7 +103,7 @@ wepy.page({
 		register(openId,telno,self){
 
 			wx.showLoading({
-  				title: '正在登陆',
+  				title: '正在登录',
 			});
 
 			let registUrl = 'https://ccbynt.cn/khxxurl/web/api/user/register?openId='+openId+'&phone='+telno;
@@ -144,7 +144,7 @@ wepy.page({
 				wx.showModal({
 			        title: '服务异常',
 			        showCancel: false,
-			        content: '登陆服务异常，请重试',
+			        content: '登录服务异常，请重试',
 			        success (res) {
 			              if (res.confirm) {
 			                
@@ -181,7 +181,7 @@ wepy.page({
 					wx.hideLoading();
 
 					wx.showLoading({
-  						title: '登陆中',
+  						title: '登录中',
 					});
 
 					//already signIn
