@@ -73,7 +73,7 @@ var utilmd5 = require('../common/md5.js')
 
 wepy.page({
 	data: {
-		bgurl: '../img/loginBg.jpg',
+		bgurl: '../img/loginBg.png',
 		appId: 'wx2f57cbeea4374512',
 		telno: '',
 		userInfo: '',

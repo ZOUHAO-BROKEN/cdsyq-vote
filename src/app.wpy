@@ -68,7 +68,7 @@ wepy.app({
     window: {
       backgroundTextStyle: 'light',
       navigationBarBackgroundColor: '#fff',
-      navigationBarTitleText: '知识竞赛投票',
+      navigationBarTitleText: '成都事业群微助手',
       navigationBarTextStyle: 'black'
     }
 }
