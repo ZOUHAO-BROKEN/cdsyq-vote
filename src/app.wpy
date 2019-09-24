@@ -63,7 +63,8 @@ wepy.app({
       'pages/voteEntrance',
       'pages/voteplayer',
       'pages/teamdetail',
-      'pages/voteteam'
+      'pages/voteteam',
+      'pages/questionnaire'
     ],
     window: {
       backgroundTextStyle: 'light',

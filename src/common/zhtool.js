@@ -22,4 +22,24 @@ function httpsRequest(url){
 	})
 }
 
+function httpsPost(url, jsonData){
+	return new Promise(function(resolve, reject){
+		wx.request({
+			url: url,
+			data: jsonData,
+			header: {
+				'content-type': 'application/json'
+			},
+			method: 'POST',
+			success(res){
+				resolve(res);
+			},
+			fail(err){
+				reject(err);
+			}
+		})
+	})
+}
+
 module.exports.httpsRequest = httpsRequest
+module.exports.httpsPost = httpsPost

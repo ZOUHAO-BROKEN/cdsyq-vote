@@ -1,0 +1,409 @@
+<style type="less">
+page{
+  height: 100%;
+}
+
+.background{
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  position:absolute;
+  left:0px;
+  top:0px;
+}
+
+.voteEn{
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.title{
+  /*height: 10%;*/
+  padding-top:60px;
+  height: 50px;
+  font-size:22px;
+  font-weight:bold;
+  text-align:center;
+}
+
+.endDateTitle{
+  height: 30px;
+  width: 90%;
+  text-align: right;
+  font-size:12px;
+}
+
+.desc{
+  font-size:16px;
+  margin-left:28px;
+  margin-right: 28px;
+}
+
+.question{
+  width: 100%;
+  padding-top:20px;
+}
+
+.questionitems{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  flex-wrap:wrap; 
+}
+
+.itemBackground{
+  /*height: 100%;*/
+  z-index: -1;
+  position:absolute;
+  width: 126px;
+  height: 147px;
+  /*left:0px;
+  top:0px;*/
+}
+
+.item{
+  width: 48%;
+  height: 200px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: flex-end;
+  flex-wrap:wrap;
+  text-align: center;
+}
+
+.optionC{
+  width: 100%;
+  height: 1%;
+}
+
+.subarea{
+  padding-top:80px;
+  width: 100%;
+  text-align: center;
+}
+
+
+</style>
+<template>
+<img class="background" mode="aspectFill" src="{{bgurl}}"/>
+<view class="">
+<view class="title">{{title}}</view>
+<view class="endDateTitle">{{endDate}}</view>
+<!--<view class="desc">{{desc}}</view>-->
+
+
+<!--<checkbox-group bindchange="checkboxChange">
+  <label class="checkbox" wx:for="{{items}}">
+    <checkbox value="{{item.name}}" checked="{{item.checked}}"/>{{item.value}}
+  </label>
+</checkbox-group>
+-->
+
+<view wx:for="{{questionArray}}" class="question" wx:for-item="questionItem" wx:key="id">
+  <!--单选-->
+  <view class="desc">{{questionItem.questionName}}</view>
+  <view wx:if="{{questionItem.isMultiSelection == 'N'}}" style="width: 100%">
+
+    <radio-group class="radio-group questionitems"  bindchange="radioChange" data-id="{{questionItem.questionId}}">
+      <view class="item"  wx:for="{{questionItem.selections}}" wx:key="selectionId">       
+            <view style="width:90%">
+            <img class="itemBackground" mode="aspectFill" src="{{itemBgurl}}"/>
+            <img style="width: 91px; height: 100px; margin-left:20px; margin-top:20px" mode="aspectFill" src="{{giftPic}}"/>
+            </view>
+            <view style="heigth:50px; width: 50%">
+            <radio name="{{item.questionId}}}" value="{{item.selectionId}}" checked="{{item.checked}}"/>{{item.selectionName}}
+            </view>
+      </view>    
+    </radio-group>
+  </view>
+  <!--多选-->
+  <view wx:if="{{item.isMultiSelection == 'N'}}">
+    
+  </view>
+</view>
+<!--<button bindtap="subChooseTap">提交</button>-->
+<view class="subarea">
+<img style="width: 210px; height: 40px;" mode="aspectFill" src="{{subPicUrl}}" bindtap="subChooseTap"/>
+</view>
+</view>
+</template>
+
+<script>
+import wepy from '@wepy/core'
+
+var zhtool = require('../common/zhtool.js')
+
+wepy.page({
+  data: {
+    userId: '',
+    giftPic: '../img/gift.png',
+    bgurl:'../img/questionnaire.png',
+    itemBgurl: '../img/rectangleBg.png',
+    subPicUrl: '../img/subBtn.png',
+    activityId: '',
+    title: '',
+    endDate: '',
+    desc: '',
+    isSelected: 'N',
+    questionArray: [],
+    selections: [],
+    answer: [],
+    items: [
+      {name: 'USA', value: '美国'},
+      {name: 'CHN', value: '中国', checked: 'true'},
+      {name: 'BRA', value: '巴西'},
+      {name: 'JPN', value: '日本'},
+      {name: 'ENG', value: '英国'},
+      {name: 'TUR', value: '法国'},
+    ]
+  },
+  methods:{
+    //提交选择
+    subChooseTap(){
+      
+      var answer = [];
+      for(var i = 0; i < this.questionArray.length; ++i){
+        if(this.questionArray[i].selectionIds){
+          answer.push({
+            
+            'questionId': this.questionArray[i].questionId,
+            'selectionIds': [this.questionArray[i].selectionIds]
+          });
+        }
+      }
+      var data = {
+        'userId': this.userId,
+        'activityId': this.activityId,
+        'isSelected': this.isSelected,
+        'mySelections': answer
+      }
+
+      if(answer.length == 0){
+        wx.showModal({
+            title: '填写错误',
+            showCancel: false,
+            content: '请至少选择一项提交！',
+            success (res) {
+              if (res.confirm) {
+                console.log('用户点击确定')
+              }
+            }
+          })
+        return;
+      }
+
+      console.log(data);
+      zhtool.httpsPost(
+        'https://ccbynt.cn/khxxurl/web/api/activity/saveSelect', 
+        data
+      ).then(res => {
+        if (res.statusCode != '200') {
+          wx.showModal({
+            title: '提交失败',
+            showCancel: false,
+            content: JSON.stringify(res),
+            success (res) {
+              if (res.confirm) {
+                console.log('用户点击确定')
+              }
+            }
+          })
+        }else{
+          
+            if(res.data.responseCode == "-1"){
+              wx.showModal({
+              title: '提交失败',
+              showCancel: false,
+              content: res.data.responseMsg,
+              success (res) {
+                if (res.confirm) {
+                  console.log('用户点击确定')
+                }
+              }
+            })
+              return;
+            }
+
+          wx.showModal({
+              title: '提示',
+              showCancel: false,
+              content: '提交成功！',
+              success (res) {
+                if (res.confirm) {
+                  console.log('用户点击确定')
+                }
+              }
+          })
+        }
+        
+      }).catch(res => {
+        console.log(res);
+        wx.showModal({
+            title: '提交失败',
+            showCancel: false,
+            content: JSON.stringify(res),
+            success (res) {
+              if (res.confirm) {
+                console.log('用户点击确定')
+              }
+            }
+        })
+      });
+      
+      //console.log(this.questionArray);
+    },
+    checkboxChange(e){
+      console.log(e.$wx.detail.value);
+    },
+    radioChange(e){
+      //console.log(e.$wx.currentTarget.dataset.id);
+      
+      for(var i = 0; i < this.questionArray.length; ++i){
+        if(this.questionArray[i].questionId == e.$wx.currentTarget.dataset.id){
+          this.questionArray[i].selectionIds = e.$wx.detail.value;
+        }
+      }
+
+      console.log(this.questionArray);
+    },
+    checkSelected(selections, selectionIds){
+      console.log('checkSelected' + questId + '-' + selectionIds);
+      console.log(selectionIds.length);
+      for(var i = 0; i < this.selections.length; ++i){
+        for(var j = 0; j < this.selectionIds.length; ++j){
+          if(this.selections[i].selectionId == this.selectionIds[j]){
+            this.selections[i].checked = true;
+            continue;
+          }
+        }
+        selections[i].checked = false;
+        /*if(questId == selectionIds[i]){
+          return true;
+        }*/
+      }
+    }
+
+  },
+  onLoad(options){
+    this.userId = options.userId;
+  },
+  created(){
+    let self = this;
+
+    let activitiesURL = 'https://ccbynt.cn/khxxurl/web/api/activity/allActivities';
+    zhtool.httpsRequest(activitiesURL).then(res => {
+      if(res.data.responseCode == 0){
+        
+        var active = res.data.responseData[res.data.responseData.length - 1];
+        self.activityId = active.activityId;
+        self.title = active.activityName;
+        
+
+        //var activeId = active.activityId;
+          let activeURL = 'https://ccbynt.cn/khxxurl/web/api/activity/content?activityId=' + self.activityId;
+
+          //TOOD for test
+          for(var t = 0; t < res.data.responseData.length; ++t){
+            if(res.data.responseData[t].activityId == '1'){
+              active = res.data.responseData[t];
+              break;
+            }
+          }
+          
+          self.endDate = '截止日期: ' + active.endTime.split(' ')[0];
+          self.activityId = active.activityId;
+          self.title = active.activityName;
+          activeURL = 'https://ccbynt.cn/khxxurl/web/api/activity/content?activityId=' + self.activityId;
+          //test end
+
+          zhtool.httpsRequest(activeURL).then(res => {
+            //console.log(res);
+            if(res.data.responseData.length > 0){
+              //console.log(res);
+              var activeDetail = res.data.responseData[res.data.responseData.length - 1];
+              self.desc = activeDetail.questionName;
+              self.questionArray = res.data.responseData;
+              
+              zhtool.httpsRequest('https://ccbynt.cn/khxxurl/web/api/activity/mySelectionResult?activityId='+self.activityId+'&userId='+self.userId).then(retRes => {
+                  console.log('--------');
+                  console.log(retRes);
+                  if((retRes.statusCode == '200') && (retRes.data.responseCode == '0') && (retRes.data.responseData.isSelected == 'Y')){
+
+console.log('is select!');
+                    self.isSelected = 'Y';
+                    //保存了历史结果
+                    //console.log('__+++++++')
+                    //console.log(self.questionArray);
+                    for(var i = 0; i < self.questionArray.length; ++i){
+                      
+                      var question = self.questionArray[i];
+                      console.log('question'+ question.questionId)
+                        console.log(question);
+                      for(var j = 0; j < retRes.data.responseData.mySelections.length; ++j){
+
+                        var answer = retRes.data.responseData.mySelections[j];
+                        if(question.questionId == answer.questionId){
+                            
+
+
+                            for(var s = 0; s < question.selections.length; ++s){
+                              for(var k = 0; k < answer.selectionIds.length; ++k){
+                                if(question.selections[s].selectionId == answer.selectionIds[k]){
+                                  question.selections[s].checked = 'true';
+                                  question.selectionIds = answer.selectionIds[k];
+                                  break;
+                                }
+                              }
+                              //question.selections[s].checked = false;
+                            }
+                            var temp = JSON.stringify(self.questionArray);
+                            self.questionArray = JSON.parse(temp);
+
+                            //console.log(self.questionArray=[]);
+                         // }
+
+                        }
+                      }
+                    }
+
+                  }
+                }).catch(res => {
+
+                })
+            }
+          });
+
+      }else{
+        wx.showModal({
+            title: '后台交易出错',
+            showCancel: false,
+            content: res.data.errMsg,
+            success (res) {
+              if (res.confirm) {
+                console.log('用户点击确定')
+              }
+            }
+        })
+      }
+
+      console.log(res);
+    }).catch(res => {
+      wx.showModal({
+            title: '后台交易出错',
+            showCancel: false,
+            content: res.responseMsg,
+            success (res) {
+              if (res.confirm) {
+                console.log('用户点击确定')
+              }
+            }
+        })
+    })
+  }
+})
+</script>

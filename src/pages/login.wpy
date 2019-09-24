@@ -117,7 +117,8 @@ wepy.page({
 					
 					
 					wx.redirectTo({
-						url: 'voteEntrance?userId='+res.data.responseData.userId
+						//url: 'voteEntrance?userId='+res.data.responseData.userId
+						url: 'questionnaire?userId='+res.data.responseData.userId
 					});
 					wx.hideLoading();
 
@@ -187,7 +188,8 @@ wepy.page({
 					//already signIn
 					if(res.data.responseData.userStatus == '1'){
 						wx.redirectTo({
-							url: 'voteEntrance?userId='+res.data.responseData.userId
+							//url: 'voteEntrance?userId='+res.data.responseData.userId
+							url: 'questionnaire?userId='+res.data.responseData.userId
 						});
 						self.signIn = true;
 						console.log('checkUser call result: user already signIn')
