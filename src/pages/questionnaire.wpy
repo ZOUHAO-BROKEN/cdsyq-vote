@@ -27,6 +27,7 @@ page{
   font-size:22px;
   font-weight:bold;
   text-align:center;
+
 }
 
 .endDateTitle{
@@ -34,6 +35,7 @@ page{
   width: 90%;
   text-align: right;
   font-size:12px;
+  color: #999999;
 }
 
 .desc{
@@ -43,14 +45,20 @@ page{
 }
 
 .question{
-  width: 100%;
+  width: 90%;
   padding-top:20px;
+  padding-bottom:20px;
+  background: #FFFFFF;
+  border-radius: 8px;
+  margin-top:10px;
+  box-shadow: 0px 2px 7px rgb(0,0,0,0.1);
+
 }
 
 .questionitems{
   width: 100%;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: flex-start;
   flex-wrap:wrap; 
 }
@@ -66,14 +74,17 @@ page{
 }
 
 .item{
-  width: 48%;
-  height: 200px;
+  width: 80%;
   display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: flex-end;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
   flex-wrap:wrap;
   text-align: center;
+  margin-top:10px;
+  margin-left: 30px;
+  scale: 0.8;
+
 }
 
 .optionC{
@@ -82,7 +93,7 @@ page{
 }
 
 .subarea{
-  padding-top:80px;
+  padding-top:40px;
   width: 100%;
   text-align: center;
 }
@@ -103,7 +114,7 @@ page{
   </label>
 </checkbox-group>
 -->
-
+<view class="voteEn">
 <view wx:for="{{questionArray}}" class="question" wx:for-item="questionItem" wx:key="id">
   <!--单选-->
   <view class="desc">{{questionItem.questionName}}</view>
@@ -112,22 +123,29 @@ page{
     <radio-group class="radio-group questionitems"  bindchange="radioChange" data-id="{{questionItem.questionId}}">
       <view class="item"  wx:for="{{questionItem.selections}}" wx:key="selectionId">       
             <view style="width:90%">
-            <img class="itemBackground" mode="aspectFill" src="{{itemBgurl}}"/>
-            <img style="width: 91px; height: 100px; margin-left:20px; margin-top:20px" mode="aspectFill" src="{{giftPic}}"/>
+            <!--<img class="itemBackground" mode="aspectFill" src="{{itemBgurl}}"/>-->
+            <!--<img style="width: 91px; height: 100px; margin-left:20px; margin-top:20px" mode="aspectFill" src="{{giftPic}}"/>-->
             </view>
-            <view style="heigth:50px; width: 50%">
-            <radio name="{{item.questionId}}}" value="{{item.selectionId}}" checked="{{item.checked}}"/>{{item.selectionName}}
+            <view>
+            <view wx:if="{{ isOver == 'Y'}}">
+              <radio name="{{item.questionId}}}" value="{{item.selectionId}}" checked="{{item.checked}}" disabled="true" />{{item.selectionName}}
+            </view>
+            <view wx:else>
+             <radio name="{{item.questionId}}}" value="{{item.selectionId}}" checked="{{item.checked}}" />{{item.selectionName}} 
+            </view>
+            
             </view>
       </view>    
     </radio-group>
   </view>
   <!--多选-->
-  <view wx:if="{{item.isMultiSelection == 'N'}}">
+  <view wx:if="{{item.isMultiSelection == 'Y'}}">
     
   </view>
 </view>
+</view>
 <!--<button bindtap="subChooseTap">提交</button>-->
-<view class="subarea">
+<view class="subarea" wx:if="{{isOver == 'N'}}">
 <img style="width: 210px; height: 40px;" mode="aspectFill" src="{{subPicUrl}}" bindtap="subChooseTap"/>
 </view>
 </view>
@@ -142,7 +160,7 @@ wepy.page({
   data: {
     userId: '',
     giftPic: '../img/gift.png',
-    bgurl:'../img/questionnaire.png',
+    bgurl:'../img/questionBg.png',
     itemBgurl: '../img/rectangleBg.png',
     subPicUrl: '../img/subBtn.png',
     activityId: '',
@@ -150,6 +168,7 @@ wepy.page({
     endDate: '',
     desc: '',
     isSelected: 'N',
+    isOver: 'N',
     questionArray: [],
     selections: [],
     answer: [],
@@ -197,11 +216,16 @@ wepy.page({
         return;
       }
 
+      wx.showLoading({
+        title: '请稍等'
+      })
+
       console.log(data);
       zhtool.httpsPost(
         'https://ccbynt.cn/khxxurl/web/api/activity/saveSelect', 
         data
       ).then(res => {
+        wx.hideLoading();
         if (res.statusCode != '200') {
           wx.showModal({
             title: '提交失败',
@@ -242,6 +266,7 @@ wepy.page({
         }
         
       }).catch(res => {
+        wx.hideLoading();
         console.log(res);
         wx.showModal({
             title: '提交失败',
@@ -291,6 +316,8 @@ wepy.page({
   },
   onLoad(options){
     this.userId = options.userId;
+    this.activityId = options.activityId;
+    this.isOver = options.isOver;
   },
   created(){
     let self = this;
@@ -299,30 +326,31 @@ wepy.page({
     zhtool.httpsRequest(activitiesURL).then(res => {
       if(res.data.responseCode == 0){
         
-        var active = res.data.responseData[res.data.responseData.length - 1];
+       /* var active = res.data.responseData[res.data.responseData.length - 1];
         self.activityId = active.activityId;
         self.title = active.activityName;
-        
+        */
 
         //var activeId = active.activityId;
-          let activeURL = 'https://ccbynt.cn/khxxurl/web/api/activity/content?activityId=' + self.activityId;
+          //let activeURL = 'https://ccbynt.cn/khxxurl/web/api/activity/content?activityId=' + self.activityId;
 
           //TOOD for test
+          let active; 
           for(var t = 0; t < res.data.responseData.length; ++t){
-            if(res.data.responseData[t].activityId == '1'){
+            if(res.data.responseData[t].activityId == self.activityId){
               active = res.data.responseData[t];
               break;
             }
           }
           
-          self.endDate = '截止日期: ' + active.endTime.split(' ')[0];
+          self.endDate = '截止日期: ' + active.endTime;
           self.activityId = active.activityId;
           self.title = active.activityName;
-          activeURL = 'https://ccbynt.cn/khxxurl/web/api/activity/content?activityId=' + self.activityId;
+          let activeURL = 'https://ccbynt.cn/khxxurl/web/api/activity/content?activityId=' + self.activityId;
           //test end
 
           zhtool.httpsRequest(activeURL).then(res => {
-            //console.log(res);
+            console.log(res);
             if(res.data.responseData.length > 0){
               //console.log(res);
               var activeDetail = res.data.responseData[res.data.responseData.length - 1];

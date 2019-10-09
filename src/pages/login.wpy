@@ -73,6 +73,8 @@ var utilmd5 = require('../common/md5.js')
 
 wepy.page({
 	data: {
+		appId: 'wx8b75a2ba1988eef8',
+		appSecret: 'ff6222cf9ba6cf07dbc9bf9e9b92692b',
 		bgurl: '../img/loginBg.png',
 		appId: 'wx2f57cbeea4374512',
 		telno: '',
@@ -118,7 +120,8 @@ wepy.page({
 					
 					wx.redirectTo({
 						//url: 'voteEntrance?userId='+res.data.responseData.userId
-						url: 'questionnaire?userId='+res.data.responseData.userId
+						//url: 'questionnaire?userId='+res.data.responseData.userId
+						url: 'homePage?userId='+res.data.responseData.userId
 					});
 					wx.hideLoading();
 
@@ -189,7 +192,8 @@ wepy.page({
 					if(res.data.responseData.userStatus == '1'){
 						wx.redirectTo({
 							//url: 'voteEntrance?userId='+res.data.responseData.userId
-							url: 'questionnaire?userId='+res.data.responseData.userId
+							//url: 'questionnaire?userId='+res.data.responseData.userId
+							url: 'homePage?userId='+res.data.responseData.userId
 						});
 						self.signIn = true;
 						console.log('checkUser call result: user already signIn')
@@ -244,16 +248,34 @@ wepy.page({
 
 	        	},
 	         fail: function(e){
-	         	console.log('get userInfo error');
-	         	console.log(e);
+	         	//console.log('get userInfo error');
+	         	//console.log(e);
 	         	wx.hideLoading();
 	         }
 	    	})
 		}
 	},
+	onLoad(){
+
+		
+
+		wx.login({
+			success: function(res){
+				console.log(res.code);
+				let getOpenIdUrl = 'https://api.weixin.qq.com/sns/jscode2session?appid='+self.appId+'&secret='+self.appSecret+'&js_code='+res.code+'&grant_type=authorization_code';
+				console.log(getOpenIdUrl);
+				zhtool.httpsRequest(getOpenIdUrl).then(res => {
+					console.log(res);
+				});
+			}
+		});
+
+		
+
+		
+	},
 
 	created(){
-
 		wx.showLoading({
   				title: '加载中',
 		})

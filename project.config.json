@@ -33,15 +33,29 @@
 			"list": [
 				{
 					"id": -1,
-					"name": "pages/voteteam",
-					"pathName": "pages/voteteam",
+					"name": "pages/voteplayer",
+					"pathName": "pages/voteplayer",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": 1,
+					"name": "pages/login",
+					"pathName": "pages/login",
 					"query": "",
 					"scene": null
 				},
 				{
 					"id": -1,
-					"name": "pages/voteplayer",
-					"pathName": "pages/voteplayer",
+					"name": "pages/login",
+					"pathName": "pages/login",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "pages/login",
+					"pathName": "pages/login",
 					"query": "",
 					"scene": null
 				}
