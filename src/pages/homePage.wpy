@@ -2,8 +2,6 @@
 page{
 width: 100%;
 height: 100%;
-background-color: #0453f8;
-
 }
 
 .body{
@@ -71,67 +69,131 @@ padding-right: 12px;
 	font-size: 14px;
 }
 
+.commonFunBtn{
+	width:160px;
+	height: 165px;
+	margin-left:10px;
+	margin-right:10px;
+}
+
+.commonFunc{
+	color: #333333;
+	font-size: 18px ;
+	display: flex;
+  	flex-direction: row;
+  	justify-content: space-around;
+  	align-items: center;
+}
+.que{
+	display: flex;
+  	flex-direction: row;
+  	justify-content: center;
+  	align-items: center;
+}
+
 </style>
-
 <template>
-<img class="pageBackground" mode="aspectFill" src="{{bgUrl}}"/>
-<view class="content">
-<view class="activityBar" wx:for="{{activityArray}}" wx:for-item="item" wx:key="id">
-<view class="activityTitle">{{item.activityName}}</view>
-<view wx:if="{{item.isOver == 'N'}}">
-<button class="activityBtn-on" @tap="quesBtnTap" isOver="N" id="{{item.activityId}}">进行中</button>
-</view>
-<view wx:else>
-<button class="activityBtn-off" @tap="quesBtnTap" isOver="Y" id="{{item.activityId}}">已结束</button>
-</view>
-</view>
-</view>
-</template>
+<runActive></runActive>
 
+<view class="commonFunc">
+<img class="commonFunBtn" @tap="menuTap"  mode="aspectFill" src="{{menuBtnUrl}}"/>
+<img class="commonFunBtn" @tap="questionaryTap"  mode="aspectFill" src="{{questionBtnUrl}}"/>
+</view>
+
+<view class="commonFunc">
+<view>食堂菜谱-建设中</view>
+<view class="que">问卷调查
+<view wx:if="{{hasQues2Fill}}">
+<img style="width:28px;height:15px;" src="{{hasQues2FillUrl}}"/>
+</view>
+</view>
+</view>
+
+<view wx:for="{{stepArray}}" class="question" wx:for-item="stepItem" wx:key="id">
+<view>{{stepItem.date}}:{{stepItem.step}}</view>
+</view>
+<!--<button class="activityBtn-on" @tap="cdSportActiveTap" id="activity">记步打卡</button>
+<button class="activityBtn-off" @tap="questionaryTap" id="questionary">问卷调查</button>
+-->
+</template>
 <script>
 import wepy from "@wepy/core"
-
-var zhtool = require('../common/zhtool.js')
+import {wxAPIPromise, httpPost, httpGet} from "../utils/common"
 
 wepy.page({
 	data: {
+		id: '',
+		sec: '',
 		userId: '',
 		bgUrl: '../img/homePagebg.png',
-		activityArray: []
+		menuBtnUrl: '../img/menuBtn.png',
+		questionBtnUrl: '../img/questionBtn.png',
+		hasQues2FillUrl: '../img/new.png',
+		activityArray: [],
+		session_key: '',
+		encryptedData:'',
+		stepArray: [],
+		userInfo: {},
+		hasQues2Fill: false
 	},
 	methods: {
-		quesBtnTap(e){
-			//console.log(e.currentTarget.id);
-			let activity;
-			for(var i = 0; i < this.activityArray.length; ++i){
-				if(this.activityArray[i].activityId == e.currentTarget.id){
-					activity = this.activityArray[i];
-					break;
-				}
-			}
+		questionaryTap(){
 			wx.navigateTo({
- 				url:"questionnaire?userId="+this.userId+"&activityId="+activity.activityId+"&isOver="+activity.isOver
+ 				url: 'questionaireHome?userId='+this.userId
           	});
-		}
-
+		},
+		menuTap(){
+			wx.showModal({
+			            title: '建设中',
+			            showCancel: false,
+			            content: '敬请期待',
+			            success (res) {
+			            
+			            }
+		    })
+		},
+		timestampToDate(timestamp) {
+	        var date = new Date(timestamp*1000);//时间戳为10位需*1000，时间戳为13位的话不需乘1000 var date = new Date(timestamp*1000);
+	        var Y = date.getFullYear() + '-';
+	        var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+	        var D = date.getDate() + ' ';
+	        
+	        return Y+M+D;
+    	}
 	},
 	created(){
-		let self = this;
-		let activitiesURL = 'https://ccbynt.cn/khxxurl/web/api/activity/allActivities';
-	    zhtool.httpsRequest(activitiesURL).then(res => {
-	      if(res.data.responseCode == 0){
-	      	self.activityArray = res.data.responseData;
-	      	console.log(self.activityArray)
-	      }else{
-
-	      }
-	  }).catch( res => {
-
-	  })
+		
+	  	
 
 	},
   	onLoad(options){
+  		let self = this;
+  		self.userInfo = getApp().$wepy.$options.globalData.userInfo;
     	this.userId = options.userId;
+
+    	let checkQuesUrl = '/activity/myNoVoteActivities?userId='+self.userInfo.userId;
+		httpGet(checkQuesUrl).then(res => {
+			if(res.data.responseData.length > 0){
+				self.hasQues2Fill = true;
+			}else{
+				self.hasQues2Fill = false;
+			}
+		});
+
+		self.id = getApp().$wepy.$options.globalData.id;
+		self.sec = getApp().$wepy.$options.globalData.sec;
   	}
 })
 </script>
+<config>
+{
+	usingComponents: {
+      runActive: '~@/components/runActivityCom',
+      counter: '~counter',
+      list: '../components/list',
+      group: '../components/group'
+    }
+
+}
+
+</config>

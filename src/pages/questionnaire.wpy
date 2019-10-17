@@ -98,6 +98,13 @@ page{
   text-align: center;
 }
 
+.content{
+  width:100%;
+  min-height: 30px;
+  border: 1px solid #cccccc;
+  text-align:left;
+}
+
 
 </style>
 <template>
@@ -118,7 +125,7 @@ page{
 <view wx:for="{{questionArray}}" class="question" wx:for-item="questionItem" wx:key="id">
   <!--单选-->
   <view class="desc">{{questionItem.questionName}}</view>
-  <view wx:if="{{questionItem.isMultiSelection == 'N'}}" style="width: 100%">
+  <view wx:if="{{questionItem.type == '1'}}" style="width: 100%">
 
     <radio-group class="radio-group questionitems"  bindchange="radioChange" data-id="{{questionItem.questionId}}">
       <view class="item"  wx:for="{{questionItem.selections}}" wx:key="selectionId">       
@@ -139,8 +146,18 @@ page{
     </radio-group>
   </view>
   <!--多选-->
-  <view wx:if="{{item.isMultiSelection == 'Y'}}">
-    
+  <view wx:if="{{questionItem.type == '2'}}" style="width: 100%">
+  <checkbox-group data-id="{{questionItem.questionId}}" bindchange="checkboxChange">
+  <label class="item" wx:for="{{questionItem.selections}}" wx:key="id">
+  <checkbox name="{{questionItem.questionId}}" value="{{item.selectionId}}" checked="{{item.checked}}"/>{{item.selectionName}}
+  </label>
+  </checkbox-group>
+  </view>
+  <!--文本-->
+  <view wx:if="{{questionItem.type == '3'}}" style="width: 100%">
+    <view class="item">
+      <input data-id="{{questionItem.questionId}}" type="text" bindblur="textContentChange" class="content" placeholder-style="text-align:left" value="{{questionItem.textContent}}"/>
+    </view>
   </view>
 </view>
 </view>
@@ -187,18 +204,36 @@ wepy.page({
       
       var answer = [];
       for(var i = 0; i < this.questionArray.length; ++i){
-        if(this.questionArray[i].selectionIds){
-          answer.push({
-            
-            'questionId': this.questionArray[i].questionId,
-            'selectionIds': [this.questionArray[i].selectionIds]
-          });
-        }
+          //单选
+          if(this.questionArray[i].selectionId){
+            answer.push({           
+              'questionId': this.questionArray[i].questionId,
+              'type': '1',
+              'selectionIds': [this.questionArray[i].selectionId]
+            });
+          }
+          //多选
+          if(this.questionArray[i].selectionIdArray){
+            answer.push({           
+              'questionId': this.questionArray[i].questionId,
+              'type': '2',
+              'selectionIds': this.questionArray[i].selectionIdArray
+            });
+          }
+          
+          //文本
+          if(this.questionArray[i].textContent){
+            answer.push({    
+              'questionId': this.questionArray[i].questionId,
+              'type': '3',
+              'textContent': this.questionArray[i].textContent
+            });
+          }
       }
       var data = {
         'userId': this.userId,
         'activityId': this.activityId,
-        'isSelected': this.isSelected,
+        //'isSelected': this.isSelected,
         'mySelections': answer
       }
 
@@ -282,15 +317,31 @@ wepy.page({
       
       //console.log(this.questionArray);
     },
+    isArray(obj){
+      return Object.prototype.toString.call(obj);
+    },
     checkboxChange(e){
-      console.log(e.$wx.detail.value);
+      //console.log(e.$wx.detail.value);
+      for(var i = 0; i < this.questionArray.length; ++i){
+        if(this.questionArray[i].questionId == e.$wx.currentTarget.dataset.id){
+          this.questionArray[i].selectionIdArray = e.$wx.detail.value;
+        }
+      }
+    },
+    textContentChange(e){
+      console.log(e);
+      for(var i = 0; i < this.questionArray.length; ++i){
+        if(this.questionArray[i].questionId == e.$wx.currentTarget.dataset.id){
+          this.questionArray[i].textContent = e.$wx.detail.value;
+        }
+      }
     },
     radioChange(e){
       //console.log(e.$wx.currentTarget.dataset.id);
       
       for(var i = 0; i < this.questionArray.length; ++i){
         if(this.questionArray[i].questionId == e.$wx.currentTarget.dataset.id){
-          this.questionArray[i].selectionIds = e.$wx.detail.value;
+          this.questionArray[i].selectionId = e.$wx.detail.value;
         }
       }
 
@@ -356,6 +407,8 @@ wepy.page({
               var activeDetail = res.data.responseData[res.data.responseData.length - 1];
               self.desc = activeDetail.questionName;
               self.questionArray = res.data.responseData;
+              console.log('questionArray value:');
+              console.log(self.questionArray);
               
               zhtool.httpsRequest('https://ccbynt.cn/khxxurl/web/api/activity/mySelectionResult?activityId='+self.activityId+'&userId='+self.userId).then(retRes => {
                   console.log('--------');
@@ -378,12 +431,22 @@ console.log('is select!');
                         if(question.questionId == answer.questionId){
                             
 
-
+                            if(question.type == '1'){
+                              question.selectionIds = answer.selectionIds;
+                            }else if(question.type == '2'){
+                              question.selectionIdArray = answer.selectionIds;
+                            }else if(question.type == '3'){
+                              question.textContent = answer.textContent;
+                            }
                             for(var s = 0; s < question.selections.length; ++s){
                               for(var k = 0; k < answer.selectionIds.length; ++k){
                                 if(question.selections[s].selectionId == answer.selectionIds[k]){
                                   question.selections[s].checked = 'true';
                                   question.selectionIds = answer.selectionIds[k];
+                                  question.selectionId = answer.selectionIds[k];
+                                  if(answer.textContent){
+                                    question.textContent = answer.textContent;
+                                  }
                                   break;
                                 }
                               }

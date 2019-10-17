@@ -1,0 +1,169 @@
+<style lang="less">
+.pageBackground{
+	width: 100%;
+	height: 100%;
+	z-index: -1;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+}
+
+.titleArea{
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.titleImg{
+	width: 135px;
+	height: 36px;
+	padding-top: 20px;
+}
+
+.detailArea{
+	
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	align-items: center;
+	flex-wrap:wrap;
+}
+
+.dayDetail{
+	margin-top: 20px;
+	padding-top: 20px;
+	width: 30%;
+	height: 142px;
+	background-color: rgba(9,90,198,0.50);
+	border-radius: 5px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	color: #FFCA0E;
+	text-align: center;
+
+}
+
+.dateNum{
+	margin-top: -23px;
+	color: #FFFFFF;
+	font-size: 12px;
+}
+
+.noNum{
+	color: #FFFFFF;
+}
+</style>
+
+<template>
+<img class="pageBackground" mode="aspectFill" src="{{detailBgUrl}}"/>
+<view class="titleArea">
+<img class="titleImg" mode="aspectFill" src="{{titleBgUrl}}"/>
+</view>
+<view class="detailArea">
+<view wx:for="{{dateArray}}" class="dayDetail">
+<view style="height: 50px">
+<img style="width: 20px; height: 20px;" src="{{dateBgUrl}}"/>
+<view class="dateNum">{{item.date}}</view>
+</view>
+<view wx:if="{{item.star == '-1'}}">
+<img style="width: 30px; height: 30px;" src="{{divStarUrl}}"/>
+<view>{{item.step}}</view>
+</view>
+<view wx:elif="{{item.star == '0'}}">
+<img style="width:95px;height:62px;" src="{{nostartUrl}}"/>
+<view class="noNum">{{item.step}}</view>
+</view>
+<view wx:elif="{{item.star == '1'}}">
+<img style="width:24px;height:26px;" src="{{starUrl}}"/>
+<view>{{item.step}}</view>
+</view>
+<view wx:elif="{{item.star == '2'}}">
+<img style="width:24px;height:26px;" src="{{starUrl}}"/>
+<img style="width:24px;height:26px;" src="{{starUrl}}"/>
+<view>{{item.step}}</view>
+</view>
+<view wx:elif="{{item.star == '3'}}">
+<img style="width:24px;height:26px;" src="{{starUrl}}"/>
+<img style="width:24px;height:26px;" src="{{starUrl}}"/>
+<img style="width:24px;height:26px;" src="{{starUrl}}"/>
+<view>{{item.step}}</view>
+</view>
+</view>
+</view>
+</template>
+
+<script>
+import wepy from "@wepy/core"
+import {wxAPIPromise, httpGet, httpPost} from "../utils/common"
+
+wepy.page({
+	data: {
+		dateArray: [5,10,15,20,25,30],
+		detailBgUrl: '../img/detailBg.png',
+		titleBgUrl: '../img/detailTitle.png',
+		dateBgUrl: '../img/dateBg.png',
+		nostartUrl: '../img/nostarts.png',
+		starUrl: '../img/start.png',
+		divStarUrl: '../img/divStar.png',
+		userInfo: {}
+	},
+	methods:{
+		dateFormat(fmt, date) {
+		    let ret;
+		    let opt = {
+		        "Y+": date.getFullYear().toString(),        // 年
+		        "m+": (date.getMonth() + 1).toString(),     // 月
+		        "d+": date.getDate().toString(),            // 日
+		        "H+": date.getHours().toString(),           // 时
+		        "M+": date.getMinutes().toString(),         // 分
+		        "S+": date.getSeconds().toString()          // 秒
+		        // 有其他格式化字符需求可以继续添加，必须转化成字符串
+		    };
+		    for (let k in opt) {
+		        ret = new RegExp("(" + k + ")").exec(fmt);
+		        if (ret) {
+		            fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, "0")))
+		        };
+		    };
+		    return fmt;
+		}
+	},
+	created(){
+		let self = this;
+		this.userInfo = getApp().$wepy.$options.globalData.userInfo;
+		var queryStepUrl = '/step/myStepResult?userId=' + this.userInfo.userId + "&month="+ this.dateFormat('YYYY-mm', new Date());
+		httpGet(queryStepUrl).then( res => {
+			console.log(res);
+			var retArray = [];
+			var retDetail = res.data.responseData.detail;
+			for(var i = 0; i < retDetail.length; ++i){
+				var dateArray = retDetail[i].date.split('-');
+				var date = parseInt(dateArray[dateArray.length - 1]); 
+
+				var item = {
+					'date': date					
+				};
+				if(!retDetail[i].step){
+					item.step = '等你开启'
+				}else{
+					item.step = retDetail[i].step;
+				}
+				if(retDetail[i].star){
+					item.star = retDetail[i].star;
+				}else{
+					item.star = 0;
+				}
+				retArray.push(item);
+			}
+			self.dateArray = retArray;
+			console.log(self.dateArray);
+		})
+	}
+})
+
+</script>

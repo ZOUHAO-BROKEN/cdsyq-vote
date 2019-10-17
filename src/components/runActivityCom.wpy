@@ -1,0 +1,306 @@
+<style lang="less">
+.pageBackground{
+	width: 100%;
+	height: 298px;
+	z-index: -1;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+}
+
+.content{
+	width: 100%;
+	margin-top: 10px;
+	display: flex;
+  	flex-direction: column;
+  	justify-content: center;
+  	align-items: center;
+}
+
+.appellation{
+	margin-top: -20px;
+}
+
+.appellBg{
+	width: 205px;
+	height: 46px;
+	left: 0px;
+	position: inherit;
+}
+
+.appeTitle{
+	margin-top: -40px;
+	text-align: center;
+	color: #A35F00;
+}
+
+.thisMonth{
+	color: #FFFFFF;
+	margin-top: 14px;
+	width: 100%;
+	display: flex;
+  	flex-direction: row;
+  	justify-content: space-between;
+  	align-items: center;
+}
+
+.progress{
+	margin-top: 14px;
+	width: 100%;
+	color: #FFFFFF;
+	display: flex;
+  	flex-direction: row;
+  	justify-content: space-around;
+  	align-items: center;
+}
+
+.starts{
+	margin-top: 14px;
+	width: 100%;
+	display: flex;
+  	flex-direction: row;
+  	justify-content: center;
+  	align-items: center;
+}
+
+.clockIn{
+	/*width: 50%;*/
+	width: 335px;
+	height: 78px;
+}
+
+.userinfo-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+}
+
+.bigMedal{
+	width: 42px;
+	height: 44px;
+}
+
+.smallMedal{
+	width: 24px;
+	height: 26px;
+}
+
+</style>
+<template>
+<img class="pageBackground" mode="aspectFill" src="{{activeBgUrl}}"/>
+
+<!--<img class="" mode="" src="{{clockInBgUrl}}"/>-->
+<view class="content">
+<image style="width:40px; height:25px" src="{{crownUrl}}"/>
+<image class="userinfo-avatar" src="{{ userInfo.avatarUrl}}" background-size="cover"/>
+<view class="appellation">
+<image class="appellBg" src="{{appellationBgUrl}}"/>
+<view class="appeTitle">{{userInfo.userName}}</view>
+</view>
+
+<view class="thisMonth">
+<view>本月成绩</view>
+<image style="width:65px; height:24px;align:right" @tap="detailTap" src="../img/des.png"/>
+</view>
+<view class="progress">
+<progress style="width: 80%" percent="{{starPercent}}" active />
+<view>\t\t\t\t{{proportion}}
+</view>
+</view>
+<view class="starts">
+<view wx:for="{{medalArray}}" wx:for-item="item">
+<img class="bigMedal" mode="aspectFill" src="{{medalUrl}}"/>
+</view>
+<view wx:for="{{startArray}}" wx:for-item="item">
+<img class="smallMedal" mode="aspectFill" src="{{startUrl}}"/>
+</view>
+<view wx:for="{{divStarArray}}" wx:for-item="item">
+<img class="bigMedal" mode="aspectFill" src="{{divStarUrl}}"/>
+</view>
+</view>
+<img class="clockIn" @tap="getWxRunData" mode="" src="{{clockInBgUrl}}"/>
+
+</view>
+</template>
+<script>
+import wepy from "@wepy/core"
+import {wxAPIPromise, httpPost, httpGet} from "../utils/common"
+
+wepy.component({
+	data: {
+		crownUrl: '../img/crown.png',
+		activeBgUrl: '../img/activeBg.png',
+		clockInBgUrl: '../img/clockInBtn.png',
+		clockAble: true,
+		medalUrl: '../img/bigMedal.png',
+		startUrl: '../img/start.png',
+		divStarUrl: '../img/divStar.png',
+		appellationBgUrl: '../img/appellation.png',
+		wxRunData: {},
+		userInfo: {},
+		stepArray: [],
+		medalArray: [],
+		startArray: [],
+		divStarArray: [],
+		proportion: '',
+		appeTitle: '',
+		starPercent: 0
+	},
+	methods: {
+		//调用微信api获取微信记步
+		getWxRunData(){
+			wx.showLoading({title: '读取微信步数'});
+			let self = this;
+			//获取微信步数，密文
+			wx.authorize({scope: "scope.werun"});
+			wxAPIPromise(wx.getWeRunData).then( runRes => {
+				
+				self.wxRunData = runRes;
+				return wxAPIPromise(wx.login);
+			//wx login 获取code
+			}).then( loginRes => {
+				var getRunDataUrl = '/getRunData?iv='+self.wxRunData.iv+'&encryptedData='+self.wxRunData.encryptedData+'&openId='+self.userInfo.openId+'&session_key='+self.userInfo.session_key+'&appId='+getApp().$wepy.$options.globalData.id;
+				//替换url中的‘／’
+				getRunDataUrl=getRunDataUrl.replace(/\+/g, '%2B');
+
+				//开发服务器解密微信步数
+				httpGet(getRunDataUrl, "openAPIDomain").then( res => {
+					console.log(res);
+					self.stepArray = res.data.stepInfoList;
+					for(var i = 0; i < self.stepArray.length; ++i){
+						self.stepArray[i].date = self.timestampToDate(self.stepArray[i].timestamp);
+					}
+					var saveRunDataUrl = '/step/saveMyStep';
+					var jsonData = {
+						'userId': getApp().$wepy.$options.globalData.userInfo.userId,
+						'myStepRecords': self.stepArray
+					}
+					return httpPost(saveRunDataUrl, jsonData);
+				}).then ( res => {
+					this.queryThisMonthSetp();
+					wx.hideLoading();
+					wx.showModal({
+			            title: '提示',
+			            showCancel: false,
+			            content: '微信运动步数提交成功！',
+			            success (res) {
+			            
+			            }
+		        	})
+					console.log(res);
+				})
+			}).catch( res => {
+				console.log(res);
+				if(res.errMsg.indexOf('auth deny') != -1){
+					wx.showModal({
+		            title: '获取微信运动步数权限错误',
+		            showCancel: false,
+		            content: '请开启微信运动步数获取权限，小程序右上角按钮－>设置，打开微信运动步数',
+		            success (res) {
+		            
+		            }
+		         })
+				}else{
+					wx.showModal({
+		            title: '获取微信运动步数错误',
+		            showCancel: false,
+		            content: res.errMsg,
+		            success (res) {
+		              
+		            }
+					})
+				}
+				 
+			})
+		},
+		timestampToDate(timestamp) {
+	        var date = new Date(timestamp*1000);//时间戳为10位需*1000，时间戳为13位的话不需乘1000 var date = new Date(timestamp*1000);
+	        var Y = date.getFullYear() + '-';
+	        var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+	        var D = date.getDate() + ' ';
+	        
+	        return Y+M+D;
+    	},
+    	//查询本月数据
+    	queryThisMonthSetp(){
+    		let self = this;
+    		var queryStepUrl = '/step/myStepResult?userId=' + this.userInfo.userId + "&month="+ this.dateFormat('YYYY-mm', new Date());
+    		console.log(queryStepUrl);
+
+    		httpGet(queryStepUrl).then( res => {
+    			console.log(res);
+    			var interval = 5;
+    			var totalNum = res.data.responseData.stars;
+
+    			if(totalNum >= 0){
+    				self.starPercent = (totalNum / 18) * 100;
+    				self.divStarArray = [];
+	    			self.medalArray = [];
+	    			var tempArray = []
+	    			for(var i = 0; i < parseInt( totalNum / interval); ++i){
+	    				tempArray.push('1');
+	    			}
+	    			self.medalArray = tempArray;
+	    			
+	    			self.startArray = [];
+	    			tempArray = []
+	    			for(var i = 0; i < totalNum % interval; ++i){
+	    				tempArray.push('1');
+	    				//self.startArray.push('1');
+	    			}
+	    			self.startArray = tempArray;
+	    			self.proportion = totalNum + '/18';
+    			}else{
+    				self.starPercent = 0;
+    				self.medalArray = [];
+    				self.startArray = [];
+    				self.divStarArray = [];
+	    			var tempArray = []
+	    			for(var i = 0; i > totalNum; --i ){
+	    				tempArray.push('-1');
+	    			}
+	    			self.divStarArray = tempArray;
+	    			self.proportion = totalNum + '/18';
+    			}
+    			
+
+    			//console.log(self.medalArray);
+    			//console.log(self.startArray);
+    		})
+    	},
+    	dateFormat(fmt, date) {
+		    let ret;
+		    let opt = {
+		        "Y+": date.getFullYear().toString(),        // 年
+		        "m+": (date.getMonth() + 1).toString(),     // 月
+		        "d+": date.getDate().toString(),            // 日
+		        "H+": date.getHours().toString(),           // 时
+		        "M+": date.getMinutes().toString(),         // 分
+		        "S+": date.getSeconds().toString()          // 秒
+		        // 有其他格式化字符需求可以继续添加，必须转化成字符串
+		    };
+		    for (let k in opt) {
+		        ret = new RegExp("(" + k + ")").exec(fmt);
+		        if (ret) {
+		            fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, "0")))
+		        };
+		    };
+		    return fmt;
+		},
+		detailTap(){
+			wx.navigateTo({
+ 				url: 'activityDetail'
+          	});
+		}
+
+	},
+	created: function(){
+		console.log('componet load');
+		this.userInfo = getApp().$wepy.$options.globalData.userInfo;
+		console.log(this.userInfo);
+		this.queryThisMonthSetp();
+		//this.getWxRunData();
+	}
+	
+})
+</script>

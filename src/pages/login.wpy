@@ -44,24 +44,15 @@ height: 100%;
   flex-direction: column-reverse;
   align-items: center;
 }
-
 </style>
-
 <template>
-
 <img class="background" mode="aspectFill" src="{{bgurl}}"/>
 <div class="body">
 <view class="inputArea">
-<!--<input style="width:100%; height:60px; background:#F5F5F5;" type="number" placeholder="请输入单位通讯录留存手机号码" bindinput="bindTelno" focus="{{telInputFocus}}" />-->
-
 <input type="digit" class="inputStyle" placeholder="请输入在单位通讯录中留存的手机号码" bindinput="bindTelno" focus="{{telInputFocus}}"/>
-
 </view>
-
 <view class="loginArea">
 <button style="width:80%;  background-color:#0E8DFD;" type="primary" size="default" open-type="getUserInfo" bindgetuserinfo="setUserInfo" disabled="{{btnDisable}}">{{btnLable}}</button>
-
-
 </view>
 </div>
 </template>
@@ -69,14 +60,14 @@ height: 100%;
 import wepy from "@wepy/core"
 
 var zhtool = require('../common/zhtool.js')
-var utilmd5 = require('../common/md5.js')
+import {wxAPIPromise, httpPost, httpGet} from "../utils/common"
+//var common = require('../common/common.js')
 
 wepy.page({
 	data: {
-		appId: 'wx8b75a2ba1988eef8',
-		appSecret: 'ff6222cf9ba6cf07dbc9bf9e9b92692b',
+		id: '',
+		sec: '',
 		bgurl: '../img/loginBg.png',
-		appId: 'wx2f57cbeea4374512',
 		telno: '',
 		userInfo: '',
 		btnDisable: true,
@@ -84,79 +75,79 @@ wepy.page({
 		openId: '',
 		nickName: '',
 		signIn: false,
-		telInputFocus: false
+		telInputFocus: false,
+		loginCode: ''
 	},
 	methods: {
 		setUserInfo(res){			
 
 			if(res.$wx.detail.errMsg != "getUserInfo:fail auth deny"){				
-				this.getOpenId(this.register);
+				this.register();
 			}else{
-
 				
-
-			/*wx.showLoading({
-  				title: '正在登录',
-			});*/
-
 			}
+			
 
 		},
-		register(openId,telno,self){
-
+		//注册登录
+		register(){
+			let self = this;
 			wx.showLoading({
   				title: '正在登录',
 			});
 
-			let registUrl = 'https://ccbynt.cn/khxxurl/web/api/user/register?openId='+openId+'&phone='+telno;
+			wxAPIPromise(wx.getUserInfo).then( res => {
+				getApp().$wepy.$options.globalData.userInfo = res.userInfo;
+				let getOpenIdUrl = '/getOpenId?appid='+self.id+'&secret='+self.sec+'&js_code='+self.loginCode;
+				return httpGet(getOpenIdUrl, 'openAPIDomain');
+			//获取openid
+			}).then( res => {
+				console.log(res);
+				/*getApp().$wepy.$options.globalData.userInfo.openId = res.data.openId;
+				getApp().$wepy.$options.globalData.userInfo.session_key = res.data.session_key;
+				self.openId = res.data.openid;*/
 
-			console.log(registUrl);
-
-			zhtool.httpsRequest(registUrl).then(res => {
-
-				//signIn success
-				if(res.data.responseData.userStatus == '1'){
-					
-					
-					wx.redirectTo({
-						//url: 'voteEntrance?userId='+res.data.responseData.userId
-						//url: 'questionnaire?userId='+res.data.responseData.userId
-						url: 'homePage?userId='+res.data.responseData.userId
-					});
-					wx.hideLoading();
-
-				//signIn fail
+				if(!self.openId){
+					getApp().$wepy.$options.globalData.userInfo.openId = res.data.openid;
+					getApp().$wepy.$options.globalData.userInfo.session_key = res.data.session_key;
+					self.openId = res.data.openid;
+					self.session_key = res.data.session_key;
 				}else{
-					wx.hideLoading();
-
+					getApp().$wepy.$options.globalData.userInfo.openId = self.openId;
+					getApp().$wepy.$options.globalData.userInfo.session_key = self.session_key;
+				}
+				let registUrl = '/user/register?openId='+self.openId+'&phone='+ self.telno;
+				return httpGet(registUrl);
+				//wx.hideLoading();
+				
+			//注册
+			}).then( res => {
+				wx.hideLoading();
+				if(res.data.responseData.userStatus == '1'){
+					getApp().$wepy.$options.globalData.userInfo.userId = res.data.responseData.userId;
+					getApp().$wepy.$options.globalData.userInfo.userName = res.data.responseData.userName;				
+					wx.redirectTo({
+						url: 'homePage?userId='+res.data.responseData.userId
+					});				
+				//signIn fail
+				}else if(res.data.responseData.userStatus == '3'){
+					wx.showModal({
+			            title: '手机号码错误',
+			            showCancel: false,
+			            content: '此微信已关联了其他手机号码，如需修改请联系综合部',
+			            success (res) {
+			            }
+			         })
+				}else{
 					wx.showModal({
 			            title: '手机号码错误',
 			            showCancel: false,
 			            content: '请输入单位通讯录留存手机号码',
 			            success (res) {
-			              if (res.confirm) {
-			                
-			              }
 			            }
 			         })
 				}
-				console.log(res);
-			}).catch(res => {
-				console.log(res);
-
-				wx.hideLoading();
-				wx.showModal({
-			        title: '服务异常',
-			        showCancel: false,
-			        content: '登录服务异常，请重试',
-			        success (res) {
-			              if (res.confirm) {
-			                
-			              }
-			        }
-			   	})
-			});
-
+			})			
 		},
 		bindTelno(e){
 			this.telno = e.$wx.detail.value;
@@ -168,122 +159,64 @@ wepy.page({
 			}
 			
 		},
-		login(){
-			
-		},
-		checkRegist(openId,telno, self){
+		checkRegist(){
+			let self = this;
+			wx.showLoading({title: '加载中'});
 
-			//self = this;
+			//微信登陆
+			wxAPIPromise(wx.login).then( res => {
+				console.log(res);
+				self.loginCode = res.code;
+				return wxAPIPromise(wx.getUserInfo);
+			//微信获取用户信息
+			}).then( res => {
+				getApp().$wepy.$options.globalData.userInfo = res.userInfo;
 
-			let checkUserUrl = 'https://ccbynt.cn/khxxurl/web/api/user/checkUser?openId='+openId;
-
-			console.log("openId:" + openId);
-
-			zhtool.httpsRequest(checkUserUrl).then(res => {
-					//console.log(res);				
-
-					wx.hideLoading();
-
-					wx.showLoading({
-  						title: '登录中',
-					});
-
-					//already signIn
-					if(res.data.responseData.userStatus == '1'){
-						wx.redirectTo({
-							//url: 'voteEntrance?userId='+res.data.responseData.userId
-							//url: 'questionnaire?userId='+res.data.responseData.userId
+				let getOpenIdUrl = '/getOpenId?appid='+self.id+'&secret='+self.sec+'&js_code='+self.loginCode;
+				return httpGet(getOpenIdUrl, 'openAPIDomain');
+			//获取openid
+			}).then( res => {
+				console.log('openId');
+				console.log(res);
+				getApp().$wepy.$options.globalData.userInfo.openid = res.data.openid;
+				getApp().$wepy.$options.globalData.userInfo.session_key = res.data.session_key;
+				self.openId = res.data.openid;
+				self.session_key = res.data.session_key;
+				let checkUserUrl = '/user/checkUser?openId='+self.openId;
+				return httpGet(checkUserUrl)
+				//console.log(res);
+			//检查注册状态
+			}).then( res => {
+				wx.hideLoading();			
+				console.log(res);
+				getApp().$wepy.$options.globalData.userInfo.userId = res.data.responseData.userId;
+				getApp().$wepy.$options.globalData.userInfo.userName = res.data.responseData.userName;
+				if(res.data.responseData.userStatus == '1'){
+					wx.redirectTo({
 							url: 'homePage?userId='+res.data.responseData.userId
-						});
-						self.signIn = true;
-						console.log('checkUser call result: user already signIn')
-					}else{
-						//wx.hideLoading();
-						this.telInputFocus = true;
-						self.signIn = false;
-						console.log('checkUser call result: user not signIn')
-					}
-
-					wx.hideLoading();
-					
-				}).catch(res => {
-
-						console.log(res);
-						self.signIn = false;
-						wx.hideLoading();
-						console.log('checkUser call result: call failed')
-
-				});
-
-		},
-		getOpenId(callbackfunc){
-
-
-			self = this;
-			//TODO request openId
-			console.log('getOpenId function');
-			wx.getUserInfo({
-	         success: function(res) {
-	         	console.log('get userInfo success');
-
-	         	//console.log(res);
-	         	self.userInfo = res.userInfo;
-	          	//console.log(res.userInfo)
-	          	//console.log(utilmd5.hexMD5(res.userInfo.avatarUrl));
-	          	//self.openId = self.userInfo.nickName;
-	          	self.openId = utilmd5.hexMD5(res.userInfo.avatarUrl);
-	          	self.nickName = self.userInfo.nickName;
-
-	          	//self.checkRegist();
-	          	if(self.openId == ""){
-	          		return;
-	          	}
-
-	          	if(callbackfunc){
-	          		callbackfunc(self.openId, self.telno, self);
-	          	}
-	          	
-
-	          	//wx.hideLoading();
-
-	        	},
-	         fail: function(e){
-	         	//console.log('get userInfo error');
-	         	//console.log(e);
-	         	wx.hideLoading();
-	         }
-	    	})
-		}
+							//url: 'activityDetail'
+					});
+				}
+				
+			})
+		}		
 	},
 	onLoad(){
-
-		
-
-		wx.login({
-			success: function(res){
-				console.log(res.code);
-				let getOpenIdUrl = 'https://api.weixin.qq.com/sns/jscode2session?appid='+self.appId+'&secret='+self.appSecret+'&js_code='+res.code+'&grant_type=authorization_code';
-				console.log(getOpenIdUrl);
-				zhtool.httpsRequest(getOpenIdUrl).then(res => {
-					console.log(res);
-				});
-			}
-		});
-
-		
-
+		let self = this;
+		let appIdGetUrl = '/getId?info';
+		httpGet(appIdGetUrl, 'openAPIDomain').then( res => {
+			console.log(res);
+			getApp().$wepy.$options.globalData.id = res.data.id;
+			getApp().$wepy.$options.globalData.sec = res.data.sec;
+			self.id = res.data.id;
+			self.sec = res.data.sec;
+			self.checkRegist();
+		})
 		
 	},
 
 	created(){
-		wx.showLoading({
-  				title: '加载中',
-		})
-
-		self = this;
-
-		this.getOpenId(this.checkRegist);
-
+		
     }
 })
 

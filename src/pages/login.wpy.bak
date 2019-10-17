@@ -1,0 +1,302 @@
+<style type="less">
+page{
+width: 100%;
+height: 100%;
+
+}
+
+.body{
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+}
+
+.background{
+  width: 100%;
+  height: 100%;
+  position:absolute;
+  left:0px;
+  top:0px;
+  z-index:-1
+}
+
+.inputArea{
+  width: 100%;
+  height: 30%;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+}
+
+.inputStyle{
+	width:80%;
+	height:40px; 
+	border:1px solid #C7C6C6;
+	border-radius:4px;
+}
+
+.loginArea{
+  width: 100%;
+  height: 10%;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+}
+
+</style>
+<template>
+<img class="background" mode="aspectFill" src="{{bgurl}}"/>
+<div class="body">
+<view class="inputArea">
+<input type="digit" class="inputStyle" placeholder="请输入在单位通讯录中留存的手机号码" bindinput="bindTelno" focus="{{telInputFocus}}"/>
+</view>
+<view class="loginArea">
+<button style="width:80%;  background-color:#0E8DFD;" type="primary" size="default" open-type="getUserInfo" bindgetuserinfo="setUserInfo" disabled="{{btnDisable}}">{{btnLable}}</button>
+</view>
+</div>
+</template>
+<script>
+import wepy from "@wepy/core"
+
+var zhtool = require('../common/zhtool.js')
+wepy.page({
+	data: {
+		appId: 'wx8b75a2ba1988eef8',
+		appSecret: 'ff6222cf9ba6cf07dbc9bf9e9b92692b',
+		bgurl: '../img/loginBg.png',
+		telno: '',
+		userInfo: '',
+		btnDisable: true,
+		btnLable: '登录',
+		openId: '',
+		nickName: '',
+		signIn: false,
+		telInputFocus: false
+	},
+	methods: {
+		setUserInfo(res){			
+
+			if(res.$wx.detail.errMsg != "getUserInfo:fail auth deny"){				
+				//this.getOpenId(this.register);
+
+			}else{
+				this.register();
+			}
+			
+
+		},
+		//注册登录
+		register(){
+
+			let self = this;
+
+			wx.showLoading({
+  				title: '正在登录',
+			});
+
+			let registUrl = 'https://ccbynt.cn/khxxurl/web/api/user/register?openId='+self.openId+'&phone='+ self.telno;
+
+			console.log(registUrl);
+
+			zhtool.httpsRequest(registUrl).then(res => {
+
+				//signIn success
+				if(res.data.responseData.userStatus == '1'){
+					
+					
+					wx.redirectTo({
+						//url: 'voteEntrance?userId='+res.data.responseData.userId
+						//url: 'questionnaire?userId='+res.data.responseData.userId
+						url: 'homePage?userId='+res.data.responseData.userId
+					});
+					wx.hideLoading();
+
+				//signIn fail
+				}else{
+					wx.hideLoading();
+
+					wx.showModal({
+			            title: '手机号码错误',
+			            showCancel: false,
+			            content: '请输入单位通讯录留存手机号码',
+			            success (res) {
+			              if (res.confirm) {
+			                
+			              }
+			            }
+			         })
+				}
+				console.log(res);
+			}).catch(res => {
+				console.log(res);
+
+				wx.hideLoading();
+				wx.showModal({
+			        title: '服务异常',
+			        showCancel: false,
+			        content: '登录服务异常，请重试',
+			        success (res) {
+			              if (res.confirm) {
+			                
+			              }
+			        }
+			   	})
+			});
+
+		},
+		bindTelno(e){
+			this.telno = e.$wx.detail.value;
+
+			if(this.telno == ""){
+				this.btnDisable = true;
+			}else{
+				this.btnDisable = false;
+			}
+			
+		},
+		checkRegist(){
+
+			wx.getUserInfo({
+	         		success: function(res) {
+	         			var app = getApp();
+	         			app.gloabalData.userInfo = res.userInfo;
+	         		}
+	        });
+	        return;
+
+			self = this;
+			wx.showLoading({
+  						title: '加载中',
+			});
+			let checkUserUrl = 'https://ccbynt.cn/khxxurl/web/api/user/checkUser?openId='+openId;
+			zhtool.httpsRequest(checkUserUrl).then(res => {
+
+					wx.hideLoading();
+
+					wx.showLoading({
+  						title: '登录中',
+					});
+
+					//already signIn
+					if(res.data.responseData.userStatus == '1'){
+						wx.redirectTo({
+							//url: 'voteEntrance?userId='+res.data.responseData.userId
+							//url: 'questionnaire?userId='+res.data.responseData.userId
+							url: 'homePage?userId='+res.data.responseData.userId
+						});
+						//self.signIn = true;
+						console.log('checkUser call result: user already signIn')
+					}else{
+						//wx.hideLoading();
+						this.telInputFocus = true;
+						//self.signIn = false;
+						console.log('checkUser call result: user not signIn')
+					}
+
+					wx.hideLoading();
+					
+				}).catch(res => {
+
+						console.log(res);
+						self.signIn = false;
+						wx.hideLoading();
+						console.log('checkUser call result: call failed')
+
+				});
+
+		}/*,
+		getOpenId(callbackfunc){
+
+
+			self = this;
+			wx.getUserInfo({
+	         success: function(res) {
+
+	         	//console.log(res);
+
+	         	self.userInfo = res.userInfo;
+	          	//self.openId = utilmd5.hexMD5(res.userInfo.avatarUrl);
+	          	self.nickName = self.userInfo.nickName;
+
+	          	//self.checkRegist();
+	          	if(self.openId == ""){
+	          		return;
+	          	}
+
+	          	if(callbackfunc){
+	          		callbackfunc(self.openId, self.telno, self);
+	          	}
+	          	
+
+	          	//wx.hideLoading();
+
+	        	},
+	         fail: function(e){
+	         	//console.log('get userInfo error');
+	         	//console.log(e);
+	         	wx.hideLoading();
+	         }
+	    	})
+		}/*/
+	},
+	onLoad(){
+		let self = this;
+		wx.login({
+			success: function(res){
+				console.log(res);		
+				
+				let getOpenIdUrl = 'https://ccbynt.cn/khxxurl/api/openAPI/getOpenId?appid='+self.appId+'&secret='+self.appSecret+'&js_code='+res.code;
+
+				zhtool.httpsRequest(getOpenIdUrl).then(res => {
+					console.log(res);
+					self.openId = res.data.openid;
+
+					let checkUserUrl = 'https://ccbynt.cn/khxxurl/web/api/user/checkUser?openId='+self.openId;
+
+					zhtool.httpsRequest(checkUserUrl).then(res => {		
+
+						//already signIn
+						if(res.data.responseData.userStatus == '1'){
+							wx.redirectTo({
+								//url: 'voteEntrance?userId='+res.data.responseData.userId
+								//url: 'questionnaire?userId='+res.data.responseData.userId
+								url: 'homePage?userId='+res.data.responseData.userId
+							});
+							self.signIn = true;
+							console.log('checkUser call result: user already signIn')
+						}else{
+							//wx.hideLoading();
+							this.telInputFocus = true;
+							self.signIn = false;
+							console.log('checkUser call result: user not signIn')
+						}
+
+						wx.hideLoading();
+					
+					}).catch(res => {
+
+							console.log(res);
+							self.signIn = false;
+							wx.hideLoading();
+							console.log('checkUser call result: call failed')
+							wx.hideLoading();
+					});
+					wx.hideLoading();
+
+				}).catch(res => {
+					wx.hideLoading();
+				})
+			}
+		})
+	},
+
+	created(){
+		wx.showLoading({
+  				title: '加载中',
+		})
+    }
+})
+
+		</script>

@@ -1,0 +1,137 @@
+<style type="less">
+page{
+	width: 100%;
+	height: 100%;
+	background-color: #0453f8;
+
+}
+
+.body{
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+
+}
+
+.pageBackground{
+	width: 100%;
+	height: 100%;
+	z-index: -1;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+}
+
+.content{
+	top: 80px;
+	width: 100%;
+	margin-top: 194px;
+	display: flex;
+  	flex-direction: column;
+  	justify-content: center;
+  	align-items: center;
+}
+
+.activityBar{
+	margin-top: 15px;
+	width: 90%;
+	height: 90px;
+	border-radius: 5px;
+	background: #FFFFFF;
+	display: flex;
+  	flex-direction: row;
+  	align-items: center;
+  	font-size: 16px;
+  	color: #333;
+  	box-shadow: 0px 2px 7px rgb(0,0,0,0.1);
+}
+
+.activityTitle{
+	width: 60%;
+	margin-left: 5px;
+	padding-left: 12px;
+	padding-right: 12px;
+}
+
+.activityBtn-on{
+	width: 80px;
+	height: 30px;
+	border-radius: 3px;
+	font-size: 14px;
+	background-color: #589FFE;
+	color: #FFFFFF;
+}
+
+.activityBtn-off{
+	width: 80px;
+	height: 30px;
+	border-radius: 3px;
+	font-size: 14px;
+}
+
+</style>
+
+<template>
+<img class="pageBackground" mode="aspectFill" src="{{bgUrl}}"/>
+<view class="content">
+<view class="activityBar" wx:for="{{activityArray}}" wx:for-item="item" wx:key="id">
+<view class="activityTitle">{{item.activityName}}</view>
+<view wx:if="{{item.isOver == 'N'}}">
+<button class="activityBtn-on" @tap="quesBtnTap" isOver="N" id="{{item.activityId}}">进行中</button>
+</view>
+<view wx:else>
+<button class="activityBtn-off" @tap="quesBtnTap" isOver="Y" id="{{item.activityId}}">已结束</button>
+</view>
+</view>
+</view>
+</template>
+
+<script>
+import wepy from "@wepy/core"
+
+var zhtool = require('../common/zhtool.js')
+
+wepy.page({
+	data: {
+		userId: '',
+		bgUrl: '../img/homePagebg.png',
+		activityArray: []
+	},
+	methods: {
+		quesBtnTap(e){
+			//console.log(e.currentTarget.id);
+			let activity;
+			for(var i = 0; i < this.activityArray.length; ++i){
+				if(this.activityArray[i].activityId == e.currentTarget.id){
+					activity = this.activityArray[i];
+					break;
+				}
+			}
+			wx.navigateTo({
+ 				url:"questionnaire?userId="+this.userId+"&activityId="+activity.activityId+"&isOver="+activity.isOver
+          	});
+		}
+
+	},
+	created(){
+		let self = this;
+		let activitiesURL = 'https://ccbynt.cn/khxxurl/web/api/activity/allActivities';
+	    zhtool.httpsRequest(activitiesURL).then(res => {
+	      if(res.data.responseCode == 0){
+	      	self.activityArray = res.data.responseData;
+	      	console.log(self.activityArray)
+	      }else{
+
+	      }
+	  }).catch( res => {
+
+	  })
+
+	},
+  	onLoad(options){
+    	this.userId = options.userId;
+  	}
+})
+</script>
