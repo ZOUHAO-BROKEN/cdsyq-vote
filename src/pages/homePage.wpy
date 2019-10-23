@@ -143,14 +143,9 @@ wepy.page({
           	});
 		},
 		menuTap(){
-			wx.showModal({
-			            title: '建设中',
-			            showCancel: false,
-			            content: '敬请期待',
-			            success (res) {
-			            
-			            }
-		    })
+		    wx.navigateTo({
+		        url: 'menuDetail'
+		    });
 		},
 		timestampToDate(timestamp) {
 	        var date = new Date(timestamp*1000);//时间戳为10位需*1000，时间戳为13位的话不需乘1000 var date = new Date(timestamp*1000);
