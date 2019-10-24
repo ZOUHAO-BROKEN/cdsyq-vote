@@ -153,37 +153,136 @@ wepy.component({
 			let self = this;
 			//获取微信步数，密文
 			wx.authorize({scope: "scope.werun"});
-			wxAPIPromise(wx.getWeRunData).then( runRes => {
-				console.log(runRes);
-				self.wxRunData = runRes;
-				return wxAPIPromise(wx.login);
-			//wx login 获取code
-			}).then( loginRes => {
+
+			//微信登陆
+			wxAPIPromise(wx.login).then( loginRes => {
 				let getOpenIdUrl = '/getOpenId?appid='+getApp().$wepy.$options.globalData.id+'&secret='+getApp().$wepy.$options.globalData.sec+'&js_code='+loginRes.code;
 				return httpGet(getOpenIdUrl, 'openAPIDomain');
-			//每次获取sessionid
-			}).then( res =>{
-				console.log(self.wxRunData.iv);
-				console.log(self.wxRunData.encryptedData);
-				console.log(self.userInfo.session_key);
-				var getRunDataUrl = '/getRunData?iv='+self.wxRunData.iv+'&encryptedData='+self.wxRunData.encryptedData+'&openId='+self.userInfo.openid+'&session_key='+res.data.session_key+'&appId='+getApp().$wepy.$options.globalData.id;
+			//openId,session_key
+			}).then( res => {
+				self.userInfo.session_key = res.data.session_key;
+				return wxAPIPromise(wx.getWeRunData);
+			//获取微信记步信息
+			}).then( runRes => {
+				console.log(runRes);
+				self.wxRunData = runRes;
+
+				var getRunDataUrl = '/getRunData?iv='+self.wxRunData.iv+'&encryptedData='+self.wxRunData.encryptedData+'&openId='+self.userInfo.openid+'&session_key='+self.userInfo.session_key+'&appId='+getApp().$wepy.$options.globalData.id;
 				//替换url中的‘／’
 				getRunDataUrl=getRunDataUrl.replace(/\+/g, '%2B');
 				//getRunDataUrl=getRunDataUrl.replace('+', '%2B');
 				//getRunDataUrl = encodeURIComponent(getRunDataUrl);
 				console.log(getRunDataUrl);
 
-				/*var data = {
-					iv: self.wxRunData.iv,
-					encryptedData: self.wxRunData.encryptedData,
-					openId: self.userInfo.openId,
-					session_key:self.userInfo.session_key,
-					appId: getApp().$wepy.$options.globalData.id
-				}
-
-				httpPost('/decrRunData?',data, "openAPIDomain").then( res => {
+				//开发服务器解密微信步数
+				httpGet(getRunDataUrl, "openAPIDomain").then( res => {
+					wx.hideLoading();
+					if(res.statusCode != '200'){
+						wx.showModal({
+				            title: '系统错误',
+				            showCancel: false,
+				            content: '微信记步加密数据解密服务出错，请联系管理员！',
+				            success (res) {
+				            
+				            }
+		        		})
+		        		return;
+					}
 					console.log(res);
-				})*/
+					self.stepArray = res.data.stepInfoList;
+					if(!res.data.stepInfoList){
+						wx.showModal({
+				            title: '系统错误',
+				            showCancel: false,
+				            content: '微信记步数据解密失败，请重试！',
+				            success (res) {
+				            
+				            }
+		        		})
+		        		return;
+					}
+					for(var i = 0; i < self.stepArray.length; ++i){
+						self.stepArray[i].date = self.timestampToDate(self.stepArray[i].timestamp);
+					}
+					var saveRunDataUrl = '/step/saveMyStep';
+					var jsonData = {
+						'userId': getApp().$wepy.$options.globalData.userInfo.userId,
+						'myStepRecords': self.stepArray
+					}
+					httpPost(saveRunDataUrl, jsonData).then( res => {
+						wx.hideLoading();
+						if(res.statusCode != '200'){
+							wx.showModal({
+					            title: '系统错误',
+					            showCancel: false,
+					            content: '微信记步数据报错服务出错，请联系管理员！',
+					            success (res) {
+					            
+					            }
+			        		})
+			        		return;
+						}
+						this.queryThisMonthSetp();
+						wx.hideLoading();
+						wx.showModal({
+				            title: '提示',
+				            showCancel: false,
+				            content: '微信运动步数提交成功！',
+				            success (res) {
+				            
+				            }
+			        	})
+						console.log(res);
+					})
+				})
+
+			}).catch( res => {
+				wx.hideLoading();
+				console.log(res);
+				if(res.errMsg.indexOf('auth deny') != -1){
+					wx.showModal({
+		            title: '获取微信运动步数权限错误',
+		            showCancel: false,
+		            content: '请开启微信运动步数获取权限，小程序右上角按钮－>设置，打开微信运动步数',
+		            success (res) {
+		            
+		            }
+		         })
+				}else{
+					wx.showModal({
+		            title: '获取微信运动步数错误',
+		            showCancel: false,
+		            content: res.errMsg,
+		            success (res) {
+		              
+		            }
+					})
+				}
+			
+			})
+		},
+
+			//登陆
+			/*wxAPIPromise(wx.login).then( loginRes => {
+				let getOpenIdUrl = '/getOpenId?appid='+getApp().$wepy.$options.globalData.id+'&secret='+getApp().$wepy.$options.globalData.sec+'&js_code='+loginRes.code;
+				return httpGet(getOpenIdUrl, 'openAPIDomain');
+			//openId
+			}).then( getOpenRes => {
+
+				return wxAPIPromise(wx.getWeRunData);
+			//获取微信记步信息
+			}).then( runRes => {
+				console.log(runRes);
+				self.wxRunData = runRes;
+
+				var getRunDataUrl = '/getRunData?iv='+self.wxRunData.iv+'&encryptedData='+self.wxRunData.encryptedData+'&openId='+self.userInfo.openid+'&session_key='+getOpenRes.data.session_key+'&appId='+getApp().$wepy.$options.globalData.id;
+				//替换url中的‘／’
+				getRunDataUrl=getRunDataUrl.replace(/\+/g, '%2B');
+				//getRunDataUrl=getRunDataUrl.replace('+', '%2B');
+				//getRunDataUrl = encodeURIComponent(getRunDataUrl);
+				console.log(getRunDataUrl);
+
+				
 
 				//开发服务器解密微信步数
 				httpGet(getRunDataUrl, "openAPIDomain").then( res => {
@@ -269,9 +368,8 @@ wepy.component({
 					})
 				}
 				 
-			})
-		},
-		timestampToDate(timestamp) {
+			})*/	
+		timestampToDate(timestamp){
 	        var date = new Date(timestamp*1000);//时间戳为10位需*1000，时间戳为13位的话不需乘1000 var date = new Date(timestamp*1000);
 	        var Y = date.getFullYear() + '-';
 	        var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
