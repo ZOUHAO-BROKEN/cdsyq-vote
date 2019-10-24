@@ -1,0 +1,140 @@
+<style lang="less">
+.timeArea {
+	position: absolute;
+	right: 5%;
+	top: 20px;
+	color: #999999;
+	font-size: 12px;
+    color: #999999;
+}
+.menuArea {
+	position: absolute;
+	display: flex;
+    flex-direction: column;
+	width: 90%;
+	left: 5%;
+	top: 45px;
+	margin-bottom: 30px;
+}
+
+.menuItem {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width: 100%;
+    min-height: 65px;
+    margin-top: 10px;
+    background: #FFFFFF;
+    box-shadow: 0 2px 7px 0 rgba(0,0,0,0.08);
+    border-radius: 8px;
+}
+
+.menuDateItem {
+    float: left;
+    width: 20%;
+    border-radius: 8px 0px 0px 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align :center;
+}
+.menuDateData {
+    width: 16px;
+    font-size: 16px;
+    color: #FFFFFF;
+}
+.menuDataItem {
+    float:right;
+    width: 80%;
+    padding: 20px;
+    font-size: 14px;
+}
+page {
+    background-color: #F7FBFF;
+}
+
+</style>
+
+<template>
+<view class="timeArea">{{dateString}}</view>
+<view class="menuArea">
+<view class="menuItem">
+    <view class="menuDateItem" style="background: #569BFA;">
+         <view class="menuDateData">周一</view>
+    </view>
+    <view class="menuDataItem">{{menuArray[0].recipe}}</view>
+</view>
+<view class="menuItem">
+    <view class="menuDateItem" style="background: #D997F5;">
+            <view class="menuDateData">周二</view>
+    </view>
+    <view class="menuDataItem">{{menuArray[1].recipe}}</view>
+</view>
+<view class="menuItem">
+    <view class="menuDateItem" style="background: #75BB9A;">
+            <view class="menuDateData">周三</view>
+    </view>
+    <view class="menuDataItem">{{menuArray[2].recipe}}</view>
+</view>
+<view class="menuItem">
+    <view class="menuDateItem" style="background: #F2BA42;">
+            <view class="menuDateData">周四</view>
+    </view>
+    <view class="menuDataItem">{{menuArray[3].recipe}}</view>
+</view>
+<view class="menuItem">
+    <view class="menuDateItem" style="background: #E88686;">
+            <view class="menuDateData">周五</view>
+    </view>
+    <view class="menuDataItem">{{menuArray[4].recipe}}</view>
+</view>
+<view class="menuItem">
+    <view class="menuDateItem" style="background: #7BCDF9;">
+            <view class="menuDateData">周六</view>
+    </view>
+    <view class="menuDataItem">{{menuArray[5].recipe}}</view>
+</view>
+<view class="menuItem">
+    <view class="menuDateItem" style="background: #8998FC;">
+            <view class="menuDateData">周日</view>
+    </view>
+    <view class="menuDataItem">{{menuArray[6].recipe}}</view>
+</view>
+</view>
+</template>
+
+<script>
+import wepy from "@wepy/core"
+import {wxAPIPromise, httpGet, httpPost} from "../utils/common"
+
+wepy.page({
+    data: {
+    		menuArray:[{date: "****.**.**",recipe: "暂无数据"},
+    		            {date: "****.**.**",recipe: "暂无数据"},
+    		            {date: "****.**.**",recipe: "暂无数据"},
+    		            {date: "****.**.**",recipe: "暂无数据"},
+    		            {date: "****.**.**",recipe: "暂无数据"},
+    		            {date: "****.**.**",recipe: "暂无数据"},
+    		            {date: "****.**.**",recipe: "暂无数据"}
+    		            ],
+    		dateString:"花园城：2019.10.10-2019.10.16"
+    	},
+    methods: {
+        creator() {
+
+        }
+    },
+    created: function(){
+        let self = this;
+        var queryStepUrl = '/recipe/recipeOfWeek';
+        httpGet(queryStepUrl).then( res => {
+            if(res.data.responseData&&res.data.responseData.length==7){
+                self.dateString = "花园城："+res.data.responseData[0].date+"-"+res.data.responseData[6].date;
+                self.menuArray = res.data.responseData;
+            }
+        })
+
+    }
+})
+</script>

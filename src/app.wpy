@@ -98,7 +98,8 @@ wepy.app({
       'pages/questionnaire',
       'pages/homePage',
       'pages/questionaireHome',
-      'pages/activityDetail'
+      'pages/activityDetail',
+      'pages/menuDetail'
     ],
     window: {
       backgroundTextStyle: 'light',
