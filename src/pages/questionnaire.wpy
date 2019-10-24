@@ -205,7 +205,7 @@ wepy.page({
       var answer = [];
       for(var i = 0; i < this.questionArray.length; ++i){
           //单选
-          if(this.questionArray[i].selectionId){
+          if(this.questionArray[i].type == '1' && this.questionArray[i].selectionId){
             answer.push({           
               'questionId': this.questionArray[i].questionId,
               'type': '1',
@@ -213,7 +213,7 @@ wepy.page({
             });
           }
           //多选
-          if(this.questionArray[i].selectionIdArray){
+          if(this.questionArray[i].type == '2' && this.questionArray[i].selectionIdArray){
             answer.push({           
               'questionId': this.questionArray[i].questionId,
               'type': '2',
@@ -222,7 +222,7 @@ wepy.page({
           }
           
           //文本
-          if(this.questionArray[i].textContent){
+          if(this.questionArray[i].type == '3' && this.questionArray[i].textContent){
             answer.push({    
               'questionId': this.questionArray[i].questionId,
               'type': '3',
@@ -249,6 +249,22 @@ wepy.page({
             }
           })
         return;
+      }
+
+      for(var i = 0; i < answer.length; ++i){
+        if(answer[i].selectionIds && answer[i].selectionIds.length == 0){
+          wx.showModal({
+            title: '未填写完成',
+            showCancel: false,
+            content: '请全部填写后再次提交！',
+            success (res) {
+              if (res.confirm) {
+                console.log('用户点击确定')
+              }
+            }
+          })
+        return;
+        }
       }
 
       wx.showLoading({
@@ -385,7 +401,7 @@ wepy.page({
         //var activeId = active.activityId;
           //let activeURL = 'https://ccbynt.cn/khxxurl/web/api/activity/content?activityId=' + self.activityId;
 
-          //TOOD for test
+          //TOOD for test ???
           let active; 
           for(var t = 0; t < res.data.responseData.length; ++t){
             if(res.data.responseData[t].activityId == self.activityId){
@@ -403,7 +419,6 @@ wepy.page({
           zhtool.httpsRequest(activeURL).then(res => {
             console.log(res);
             if(res.data.responseData.length > 0){
-              //console.log(res);
               var activeDetail = res.data.responseData[res.data.responseData.length - 1];
               self.desc = activeDetail.questionName;
               self.questionArray = res.data.responseData;
@@ -411,8 +426,6 @@ wepy.page({
               console.log(self.questionArray);
               
               zhtool.httpsRequest('https://ccbynt.cn/khxxurl/web/api/activity/mySelectionResult?activityId='+self.activityId+'&userId='+self.userId).then(retRes => {
-                  console.log('--------');
-                  console.log(retRes);
                   if((retRes.statusCode == '200') && (retRes.data.responseCode == '0') && (retRes.data.responseData.isSelected == 'Y')){
 
 console.log('is select!');

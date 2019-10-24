@@ -82,7 +82,7 @@ page{
 <button class="activityBtn-on" @tap="quesBtnTap" isOver="N" id="{{item.activityId}}">进行中</button>
 </view>
 <view wx:else>
-<button class="activityBtn-off" @tap="quesBtnTap" isOver="Y" id="{{item.activityId}}">已结束</button>
+<button class="activityBtn-off" @tap="quesBtnTap" isOver="Y" id="{{item.activityIdN}}">已结束</button>
 </view>
 </view>
 </view>
@@ -106,6 +106,7 @@ wepy.page({
 			for(var i = 0; i < this.activityArray.length; ++i){
 				if(this.activityArray[i].activityId == e.currentTarget.id){
 					activity = this.activityArray[i];
+
 					break;
 				}
 			}
@@ -121,6 +122,9 @@ wepy.page({
 	    zhtool.httpsRequest(activitiesURL).then(res => {
 	      if(res.data.responseCode == 0){
 	      	self.activityArray = res.data.responseData;
+	      	for(var i = 0; i < self.activityArray.length; ++i){
+	      		self.activityArray[i].activityIdN = self.activityArray[i].activityId;
+	      	}
 	      	console.log(self.activityArray)
 	      }else{
 

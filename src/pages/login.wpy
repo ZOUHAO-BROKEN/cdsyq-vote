@@ -122,6 +122,16 @@ wepy.page({
 				
 			//注册
 			}).then( res => {
+				if(res.statusCode != '200'){
+					wx.showModal({
+			            title: '服务异常',
+			            showCancel: false,
+			            content: '后端注册服务异常，请联系管理员',
+			            success (res) {
+			            }
+			         })
+					return;
+				}
 				wx.hideLoading();
 				if(res.data.responseData.userStatus == '1'){
 					getApp().$wepy.$options.globalData.userInfo.userId = res.data.responseData.userId;
@@ -176,8 +186,28 @@ wepy.page({
 				return httpGet(getOpenIdUrl, 'openAPIDomain');
 			//获取openid
 			}).then( res => {
-				console.log('openId');
-				console.log(res);
+				if(res.statusCode != '200'){
+					wx.showModal({
+			            title: '服务异常',
+			            showCancel: false,
+			            content: '后端openId解析服务异常，请联系管理员',
+			            success (res) {
+			            }
+			         })
+					return;
+				}
+
+				/*if(!res.data.openid){
+					wx.showModal({
+			            title: '服务异常',
+			            showCancel: false,
+			            content: '获取openId服务异常，请联系管理员',
+			            success (res) {
+			            }
+			         })
+					return;
+				}*/
+
 				getApp().$wepy.$options.globalData.userInfo.openid = res.data.openid;
 				getApp().$wepy.$options.globalData.userInfo.session_key = res.data.session_key;
 				self.openId = res.data.openid;
@@ -187,6 +217,16 @@ wepy.page({
 				//console.log(res);
 			//检查注册状态
 			}).then( res => {
+				if(res.statusCode != '200'){
+					wx.showModal({
+			            title: '服务异常',
+			            showCancel: false,
+			            content: '后端注册检查服务异常，请联系管理员',
+			            success (res) {
+			            }
+			         })
+					return;
+				}
 				wx.hideLoading();			
 				console.log(res);
 				getApp().$wepy.$options.globalData.userInfo.userId = res.data.responseData.userId;
@@ -205,12 +245,23 @@ wepy.page({
 		let self = this;
 		let appIdGetUrl = '/getId?info';
 		httpGet(appIdGetUrl, 'openAPIDomain').then( res => {
-			console.log(res);
-			getApp().$wepy.$options.globalData.id = res.data.id;
-			getApp().$wepy.$options.globalData.sec = res.data.sec;
-			self.id = res.data.id;
-			self.sec = res.data.sec;
-			self.checkRegist();
+			if(res.statusCode == '200'){
+				console.log(res);
+				getApp().$wepy.$options.globalData.id = res.data.id;
+				getApp().$wepy.$options.globalData.sec = res.data.sec;
+				self.id = res.data.id;
+				self.sec = res.data.sec;
+				self.checkRegist();
+			}else{
+				wx.showModal({
+			            title: '后端服务请求出错',
+			            showCancel: false,
+			            content: '请联系管理员',
+			            success (res) {
+			            }
+			         })
+			}
+			
 		})
 		
 	},
