@@ -101,7 +101,7 @@ padding-right: 12px;
 </view>
 
 <view class="commonFunc">
-<view>食堂菜谱-建设中</view>
+<view>食堂菜谱</view>
 <view class="que">问卷调查
 <view wx:if="{{hasQues2Fill}}">
 <img style="width:28px;height:15px;" src="{{hasQues2FillUrl}}"/>
@@ -164,9 +164,25 @@ wepy.page({
   	onLoad(options){
   		let self = this;
   		self.userInfo = getApp().$wepy.$options.globalData.userInfo;
-    	this.userId = options.userId;
+  		self.userId = self.userInfo.userId;
+    	//this.userId = options.userId;
 
-    	let checkQuesUrl = '/activity/myNoVoteActivities?userId='+self.userInfo.userId;
+    	/*let checkQuesUrl = '/activity/myNoVoteActivities?userId='+self.userInfo.userId;
+		httpGet(checkQuesUrl).then(res => {
+			if(res.data.responseData.length > 0){
+				self.hasQues2Fill = true;
+			}else{
+				self.hasQues2Fill = false;
+			}
+		});*/
+
+		self.id = getApp().$wepy.$options.globalData.id;
+		self.sec = getApp().$wepy.$options.globalData.sec;
+  	},
+  	onShow(){
+  		let self = this;
+  		wx.showLoading({title: '加载中'});
+  		let checkQuesUrl = '/activity/myNoVoteActivities?userId='+self.userInfo.userId;
 		httpGet(checkQuesUrl).then(res => {
 			if(res.data.responseData.length > 0){
 				self.hasQues2Fill = true;
@@ -174,10 +190,9 @@ wepy.page({
 				self.hasQues2Fill = false;
 			}
 		});
-
-		self.id = getApp().$wepy.$options.globalData.id;
-		self.sec = getApp().$wepy.$options.globalData.sec;
+  		wx.hideLoading();
   	}
+
 })
 </script>
 <config>

@@ -8,7 +8,7 @@ export function wxAPIPromise(func, obj){
 			success: resolve,
 			fail: function(err){
 				wx.hideLoading();
-				if(JSON.stringify(err).indexOf('scope unauthorized') == -1){
+				if(JSON.stringify(err).indexOf('getUserInfo:fail') == -1){
 					wx.showModal({
 			            title: '服务异常',
 			            showCancel: false,
