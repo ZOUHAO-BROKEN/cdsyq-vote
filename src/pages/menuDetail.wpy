@@ -131,6 +131,10 @@ wepy.page({
         httpGet(queryStepUrl).then( res => {
             if(res.data.responseData&&res.data.responseData.length==7){
                 self.dateString = "花园城："+res.data.responseData[0].date+"-"+res.data.responseData[6].date;
+                for(var i =0;i<res.data.responseData.length;i++){
+                    if(null === res.data.responseData[i].recipe || "" === res.data.responseData[i].recipe || "" === res.data.responseData[i].recipe .trim())
+                        res.data.responseData[i].recipe  = "无供应";
+                }
                 self.menuArray = res.data.responseData;
             }
         })
