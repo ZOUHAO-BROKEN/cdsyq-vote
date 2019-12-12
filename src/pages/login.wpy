@@ -98,8 +98,8 @@ wepy.page({
 
 			wxAPIPromise(wx.getUserInfo).then( res => {
 				getApp().$wepy.$options.globalData.userInfo = res.userInfo;
-				let getOpenIdUrl = '/getOpenId?appid='+self.id+'&secret='+self.sec+'&js_code='+self.loginCode;
-				return httpGet(getOpenIdUrl, 'openAPIDomain');
+				let getOpenIdUrl = '/user/getOpenId?js_code='+self.loginCode;
+				return httpGet(getOpenIdUrl);
 			//获取openid
 			}).then( res => {
 				console.log(res);
@@ -107,11 +107,13 @@ wepy.page({
 				getApp().$wepy.$options.globalData.userInfo.session_key = res.data.session_key;
 				self.openId = res.data.openid;*/
 
+				let openIdJson = JSON.parse(res.data.responseData);
+
 				if(!self.openId){
-					getApp().$wepy.$options.globalData.userInfo.openId = res.data.openid;
-					getApp().$wepy.$options.globalData.userInfo.session_key = res.data.session_key;
-					self.openId = res.data.openid;
-					self.session_key = res.data.session_key;
+					getApp().$wepy.$options.globalData.userInfo.openId = openIdJson.openid;
+					getApp().$wepy.$options.globalData.userInfo.session_key = openIdJson.session_key;
+					self.openId = openIdJson.openid;
+					self.session_key = openIdJson.session_key;
 				}else{
 					getApp().$wepy.$options.globalData.userInfo.openId = self.openId;
 					getApp().$wepy.$options.globalData.userInfo.session_key = self.session_key;
@@ -173,6 +175,26 @@ wepy.page({
 			let self = this;
 			wx.showLoading({title: '加载中'});
 
+			/*wxAPIPromise(wx.login).then( res => {
+				self.loginCode = res.code;
+				return wxAPIPromise(wx.getUserInfo);
+			}).then( res => {
+				getApp().$wepy.$options.globalData.userInfo = res.userInfo;
+				let getOpenIdUrl = '/getOpenId?js_code='+ self.loginCode;
+				return httpGet(getOpenIdUrl);
+			}).then( res => {
+				if( res.statusCode != '200'){
+					wx.showModal({
+			            title: '服务异常',
+			            showCancel: false,
+			            content: '后端openId解析服务异常，请联系管理员',
+			            success (res) {
+			            }
+			         })
+					return;
+				}
+			})*/
+
 			//微信登陆
 			wxAPIPromise(wx.login).then( res => {
 				console.log(res);
@@ -182,8 +204,8 @@ wepy.page({
 			}).then( res => {
 				getApp().$wepy.$options.globalData.userInfo = res.userInfo;
 
-				let getOpenIdUrl = '/getOpenId?appid='+self.id+'&secret='+self.sec+'&js_code='+self.loginCode;
-				return httpGet(getOpenIdUrl, 'openAPIDomain');
+				let getOpenIdUrl = '/user/getOpenId?js_code='+self.loginCode;
+				return httpGet(getOpenIdUrl);
 			//获取openid
 			}).then( res => {
 				if(res.statusCode != '200'){
@@ -196,22 +218,14 @@ wepy.page({
 			         })
 					return;
 				}
+				console.log(res);
 
-				/*if(!res.data.openid){
-					wx.showModal({
-			            title: '服务异常',
-			            showCancel: false,
-			            content: '获取openId服务异常，请联系管理员',
-			            success (res) {
-			            }
-			         })
-					return;
-				}*/
+				let openIdJson = JSON.parse(res.data.responseData);
 
-				getApp().$wepy.$options.globalData.userInfo.openid = res.data.openid;
-				getApp().$wepy.$options.globalData.userInfo.session_key = res.data.session_key;
-				self.openId = res.data.openid;
-				self.session_key = res.data.session_key;
+				getApp().$wepy.$options.globalData.userInfo.openid = openIdJson.openid;
+				getApp().$wepy.$options.globalData.userInfo.session_key = openIdJson.session_key;
+				self.openId = openIdJson.openid;
+				self.session_key = openIdJson.session_key;
 				let checkUserUrl = '/user/checkUser?openId='+self.openId;
 				return httpGet(checkUserUrl)
 				//console.log(res);
@@ -236,14 +250,17 @@ wepy.page({
 							url: 'homePage?userId='+res.data.responseData.userId
 							//url: 'activityDetail'
 					});
+					/*wx.redirectTo({
+						url: 'activityDetail?userId'+res.data.responseData.userId
+					})*/
 				}
 				
 			})
 		}		
 	},
 	onLoad(){
-		let self = this;
-		let appIdGetUrl = '/getId?info';
+		this.checkRegist();
+		/*let appIdGetUrl = '/getId?info';
 		httpGet(appIdGetUrl, 'openAPIDomain').then( res => {
 			if(res.statusCode == '200'){
 				console.log(res);
@@ -262,7 +279,7 @@ wepy.page({
 			         })
 			}
 			
-		})
+		})*/
 		
 	},
 

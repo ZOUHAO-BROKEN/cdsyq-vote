@@ -1,4 +1,8 @@
 <style lang="less">
+page{
+	height: 100%;
+	background-color: rgba(89,159,255,0.90);
+}
 .pageBackground{
 	width: 100%;
 	height: 100%;
@@ -57,6 +61,52 @@
 .noNum{
 	color: #FFFFFF;
 }
+
+.lastMonth{
+	width: 100%;
+	margin-top: 20px;
+}
+
+.lastMonthBg{
+	width:100%;
+	height: 125px;
+}
+
+.starts{
+	width: 100%;
+	display: flex;
+  	flex-direction: row;
+  	justify-content: center;
+  	align-items: center;
+}
+
+.bigMedal{
+	width: 42px;
+	height: 44px;
+}
+
+.smallMedal{
+	width: 24px;
+	height: 26px;
+}
+
+.lastMonthDetail{
+	margin-top: -110px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	color: #A96705;
+}
+
+.winRate{
+	
+}
+
+.winRateNum{
+	font-size: 22px;
+}
+
 </style>
 
 <template>
@@ -95,6 +145,27 @@
 </view>
 </view>
 </view>
+<view class="titleArea">
+<img class="titleImg" mode="aspectFill" src="{{lastMonthTitle}}"/>
+</view>
+<view class="lastMonth">
+<img class="lastMonthBg" mode="aspectFit" src="../img/lastMonthBg.png"/>
+<view class="lastMonthDetail">
+<view class="winRate">上月打败了<label class="winRateNum">{{winRate}}</label>的伙伴</view>
+<view class="starts">
+<view wx:for="{{medalArray}}" wx:for-item="item">
+<img class="bigMedal" mode="aspectFill" src="{{medalUrl}}"/>
+</view>
+<view wx:for="{{startArray}}" wx:for-item="item">
+<img class="smallMedal" mode="aspectFill" src="{{startUrl}}"/>
+</view>
+<view wx:for="{{divStarArray}}" wx:for-item="item">
+<img class="bigMedal" mode="aspectFill" src="{{divStarUrl}}"/>
+</view>
+</view>
+</view>
+
+</view>
 </template>
 
 <script>
@@ -106,11 +177,20 @@ wepy.page({
 		dateArray: [5,10,15,20,25,30],
 		detailBgUrl: '../img/detailBg.png',
 		titleBgUrl: '../img/detailTitle.png',
+		lastMonthTitle: '../img/lastMonthTitle.png',
 		dateBgUrl: '../img/dateBg.png',
 		nostartUrl: '../img/nostarts.png',
 		starUrl: '../img/start.png',
 		divStarUrl: '../img/divStar.png',
-		userInfo: {}
+		medalUrl: '../img/bigMedal.png',
+		startUrl: '../img/start.png',
+		divStarUrl: '../img/divStar.png',
+		userInfo: {},
+		medalArray: [],
+		startArray: [],
+		divStarArray: [],
+		winRate: '',
+		dateStr: ''
 	},
 	methods:{
 		dateFormat(fmt, date) {
@@ -138,7 +218,6 @@ wepy.page({
 		this.userInfo = getApp().$wepy.$options.globalData.userInfo;
 		var queryStepUrl = '/step/myStepResult?userId=' + this.userInfo.userId + "&month="+ this.dateFormat('YYYY-mm', new Date());
 		httpGet(queryStepUrl).then( res => {
-			console.log(res);
 			var retArray = [];
 			var retDetail = res.data.responseData.detail;
 			for(var i = 0; i < retDetail.length; ++i){
@@ -163,6 +242,56 @@ wepy.page({
 			self.dateArray = retArray;
 			console.log(self.dateArray);
 		})
+
+		let now = new Date();
+		if(now.getMonth == 0){
+			self.dateStr = (now.getFullYear() - 1).toString() + '-12';
+		}else{
+			self.dateStr = now.getFullYear().toString() + '-' + now.getMonth().toString();
+		}
+		
+		queryStepUrl = '/step/myStepResult?userId=' + this.userInfo.userId + "&month="+ this.dateFormat('YYYY-mm', new Date(self.dateStr));
+		//queryStepUrl = '/step/myStepResult?userId=776&month='+ this.dateFormat('YYYY-mm', new Date(self.dateStr));
+		console.log(queryStepUrl);
+		httpGet(queryStepUrl).then( res => {
+
+			console.log(res);
+			var interval = 5;
+			let totalNum = res.data.responseData.stars;
+			self.winRate = res.data.responseData.myBeatRatio;
+			if(totalNum >= 0){
+    				
+    				self.divStarArray = [];
+	    			self.medalArray = [];
+	    			var tempArray = []
+	    			for(var i = 0; i < parseInt( totalNum / interval); ++i){
+	    				tempArray.push('1');
+	    			}
+	    			self.medalArray = tempArray;
+	    			
+	    			self.startArray = [];
+	    			tempArray = []
+	    			for(var i = 0; i < totalNum % interval; ++i){
+	    				tempArray.push('1');
+	    				//self.startArray.push('1');
+	    			}
+	    			self.startArray = tempArray;
+
+    			}else{
+    				self.starPercent = 0;
+    				self.medalArray = [];
+    				self.startArray = [];
+    				self.divStarArray = [];
+	    			var tempArray = []
+	    			for(var i = 0; i > totalNum; --i ){
+	    				tempArray.push('-1');
+	    			}
+	    			self.divStarArray = tempArray;
+
+    			}
+		})
+		//console.log(queryStepUrl);
+		//httpGet()
 	}
 })
 
