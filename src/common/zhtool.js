@@ -41,5 +41,13 @@ function httpsPost(url, jsonData){
 	})
 }
 
+function setStorage(key, data){
+
+}
+
+function getStorage(key){
+	
+}
+
 module.exports.httpsRequest = httpsRequest
 module.exports.httpsPost = httpsPost
